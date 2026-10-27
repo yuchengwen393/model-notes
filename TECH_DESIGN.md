@@ -69,7 +69,7 @@ PyTorch + MiniMind-768 SFT 权重（10.21/out_large/full_sft_large_768.pth）
 1. `blog/` 推送到 `yuchengwen393/model-notes`，Pages 选择 `main` 根目录；
 2. 本机运行 `chat-service/app.py`；
 3. `ssh -R 80:127.0.0.1:5050 nokey@localhost.run` 获取 HTTPS 地址；
-4. 把地址写入 `blog/js/config.js` 的 `chatApi`，提交后 Pages 自动重建。
+4. 把地址写入 `blog/data/config.json` 的 `chatApi`，页面每次加载都会重新读取该文件。
 
 ## 六、风险与取舍
 

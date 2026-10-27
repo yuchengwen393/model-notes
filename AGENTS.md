@@ -24,7 +24,7 @@ cd 10.27\chat-service
 - 新增文章时同时更新 `data/posts.json` 与 `posts/<id>.md`，id 用 `MM-DD-slug`；
 - 页面之间的链接使用相对路径，保证 Pages 子路径可用；
 - 样式变量集中在 `css/style.css` 的 `:root`，不要散落硬编码颜色；
-- 对话请求只发送到 `js/config.js` 中的 `chatApi`，不在前端硬编码其他地址；
+- 对话请求只发送到 `data/config.json` 中的 `chatApi`，不在前端硬编码其他地址；
 - 不提交模型权重（`.pth`）、虚拟环境（`.venv`）、日志与缓存；
 - 每次改动后至少手动验证：首页文章加载、文章详情渲染、对话页状态与一轮问答。
 

@@ -1,5 +1,11 @@
-(function () {
-  const config = window.BLOG_CONFIG || {};
+(async function () {
+  let config = {};
+  try {
+    const res = await fetch(`data/config.json?t=${Date.now()}`, { cache: "no-store" });
+    if (res.ok) config = await res.json();
+  } catch {
+    config = {};
+  }
   const isLocal = ["localhost", "127.0.0.1", ""].includes(location.hostname);
   const apiBase = (config.chatApi || (isLocal ? "http://127.0.0.1:5050" : "")).replace(/\/$/, "");
 
@@ -83,7 +89,7 @@
 
   async function checkHealth() {
     if (!apiBase) {
-      setStatus("offline", "模型服务未配置：请在 js/config.js 中填入推理 API 地址");
+      setStatus("offline", "模型服务未配置：请在 data/config.json 中填入推理 API 地址");
       return;
     }
     const controller = new AbortController();
