@@ -9,7 +9,7 @@
 课上先实现了一个字符级 / 词级混合的简单分词器：统计词频、建立词表、把句子切成 token。它足够解释原理，但遇到没见过的词就只能落到 `[UNK]`，中文尤其明显。
 
 ~~~python
-text = "大连民族大学"
+text = "人工智能改变世界"
 ids = tokenizer.encode(text)
 print(ids)
 print(tokenizer.decode(ids))

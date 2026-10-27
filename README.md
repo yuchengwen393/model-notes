@@ -1,4 +1,4 @@
-# 模型手记 · Yucheng Notes
+# 模型手记 · Model Notes
 
 一个从零训练语言模型、再做插件与部署的个人博客。静态页面发布在 GitHub Pages，对话页调用本机的 Flask 推理服务，加载课程中训练出的 MiniMind-768 SFT 权重。
 

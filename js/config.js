@@ -3,5 +3,5 @@ window.BLOG_CONFIG = {
   chatApi: "https://66b4ac7528dd3f.lhr.life",
   modelName: "MiniMind-768 SFT",
   repo: "https://github.com/yuchengwen393/model-notes",
-  author: "文昱塍",
+  author: "模型手记",
 };

@@ -34,7 +34,7 @@
         <span>·</span>
         <span>${post.readingTime}</span>
         <span>·</span>
-        <span>文昱塍</span>`;
+        <span>模型手记</span>`;
 
       tagsEl.innerHTML = post.tags
         .map((tag) => `<a class="tag" href="posts.html?tag=${encodeURIComponent(tag)}">${tag}</a>`)

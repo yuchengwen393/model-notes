@@ -17,7 +17,7 @@
 
 域名：
 
-> https://yuchengwen393.github.io/blog/
+> https://yuchengwen393.github.io/model-notes/
 
 ## 对话：本地推理 API
 
