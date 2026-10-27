@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>关于 · 模型手记</title>
+  <meta name="description" content="文昱塍，物联网工程专业，记录从模型训练到 Web 部署的实践。">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="about">
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">文</span>
+        <span class="brand-text">模型手记<small>Yucheng&nbsp;Notes</small></span>
+      </a>
+      <nav class="nav" id="nav">
+        <a data-nav="home" href="index.html">首页</a>
+        <a data-nav="posts" href="posts.html">文章</a>
+        <a data-nav="projects" href="projects.html">项目</a>
+        <a data-nav="about" href="about.html">关于</a>
+        <a class="nav-cta" data-nav="chat" href="chat.html">和模型对话</a>
+      </nav>
+      <button class="menu-btn" id="menuBtn" aria-label="打开菜单" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-head">
+      <div class="wrap">
+        <div class="eyebrow">About · 关于</div>
+        <h1>写下跑通的部分</h1>
+        <p>不记录「今天学了什么」，只记录哪些东西真正跑起来了、在哪里卡住、最后怎么解决。</p>
+      </div>
+    </section>
+
+    <section class="wrap">
+      <div class="about-grid">
+        <div class="monogram reveal">
+          <span>文</span>
+          <small>WEN YUCHENG / 2024171221</small>
+        </div>
+
+        <div class="about-copy">
+          <h2>文昱塍</h2>
+          <p>
+            大连民族大学物联网工程专业学生。这个学期在软件开发综合实践里，
+            第一次把一个语言模型从分词器一路做到网页：自己写注意力、跑预训练、
+            做 SFT，再把权重装进 Flask 接口和这个博客。
+          </p>
+          <p>
+            平时更关心「能不能用」而不是「看起来多厉害」：插件要能下载，
+            官网要有域名，模型要能回答。做不好的地方就写下来，下一篇继续改。
+          </p>
+
+          <table class="info-table">
+            <tr><th>学校</th><td>大连民族大学</td></tr>
+            <tr><th>专业</th><td>物联网工程</td></tr>
+            <tr><th>学号</th><td>2024171221</td></tr>
+            <tr><th>方向</th><td>语言模型训练 · 前端工程 · AI 工具</td></tr>
+            <tr><th>时间</th><td>2026 年 10 月 · 软件开发综合实践</td></tr>
+          </table>
+
+          <div class="skill-groups">
+            <div class="skill-group">
+              <h3>Model</h3>
+              <ul>
+                <li>PyTorch / Transformers</li>
+                <li>Transformer、RoPE、KV Cache</li>
+                <li>预训练、SFT、LoRA</li>
+                <li>分词器训练与 Chat Template</li>
+              </ul>
+            </div>
+            <div class="skill-group">
+              <h3>Web</h3>
+              <ul>
+                <li>HTML / CSS / JavaScript</li>
+                <li>Chrome Extension Manifest V3</li>
+                <li>Flask API 与 CORS</li>
+                <li>Git / GitHub Pages / 部署</li>
+              </ul>
+            </div>
+          </div>
+
+          <h2 style="margin-top: 48px;">这八天</h2>
+          <p>
+            10.19 分词器 → 10.20 Transformer → 10.21 预训练 → 10.22 SFT 与 LoRA →
+            10.23 AI 零代码与 AI 编程 → 10.26 ImageGrab 插件与官网 →
+            10.27 排查、部署与这个博客。
+          </p>
+          <p>
+            更完整的记录在 <a href="posts.html" style="color: var(--accent); border-bottom: 1px solid currentColor;">文章列表</a>，
+            训练出的模型可以在 <a href="chat.html" style="color: var(--accent); border-bottom: 1px solid currentColor;">对话页</a> 直接试。
+          </p>
+
+          <h2 style="margin-top: 48px;">联系</h2>
+          <p>
+            GitHub：<a href="https://github.com/yuchengwen393" target="_blank" rel="noreferrer" style="color: var(--accent); border-bottom: 1px solid currentColor;">@yuchengwen393</a><br>
+            项目仓库：<a href="https://github.com/yuchengwen393/imagegrab" target="_blank" rel="noreferrer" style="color: var(--accent); border-bottom: 1px solid currentColor;">imagegrab</a>
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-top">
+        <div class="footer-mark">文昱塍</div>
+        <div class="footer-links">
+          <a href="posts.html">文章</a>
+          <a href="projects.html">项目</a>
+          <a href="chat.html">模型对话</a>
+          <a href="https://github.com/yuchengwen393" target="_blank" rel="noreferrer">GitHub</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> 文昱塍 · 大连民族大学</span>
+        <span>HTML / CSS / 63.9M PARAMS</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/site.js"></script>
+</body>
+</html>

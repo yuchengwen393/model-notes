@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文章 · 模型手记</title>
+  <meta name="description" content="分词器、Transformer、预训练、SFT、AI 编程、插件与部署的完整记录。">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="posts">
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">文</span>
+        <span class="brand-text">模型手记<small>Yucheng&nbsp;Notes</small></span>
+      </a>
+      <nav class="nav" id="nav">
+        <a data-nav="home" href="index.html">首页</a>
+        <a data-nav="posts" href="posts.html">文章</a>
+        <a data-nav="projects" href="projects.html">项目</a>
+        <a data-nav="about" href="about.html">关于</a>
+        <a class="nav-cta" data-nav="chat" href="chat.html">和模型对话</a>
+      </nav>
+      <button class="menu-btn" id="menuBtn" aria-label="打开菜单" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-head">
+      <div class="wrap">
+        <div class="eyebrow">Archive · 2026 秋</div>
+        <h1>八天，八篇</h1>
+        <p>按时间排列的实践记录。可以搜索标题与摘要，也可以按标签筛选。</p>
+      </div>
+    </section>
+
+    <section class="wrap">
+      <div class="toolbar">
+        <input class="search-input" id="searchInput" type="search" placeholder="搜索标题、摘要或标签……" aria-label="搜索文章">
+        <div id="tagFilters" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+      </div>
+      <p class="result-count" id="resultCount">— 篇</p>
+      <div class="post-list" id="postList"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-top">
+        <div class="footer-mark">文昱塍</div>
+        <div class="footer-links">
+          <a href="posts.html">文章</a>
+          <a href="projects.html">项目</a>
+          <a href="chat.html">模型对话</a>
+          <a href="https://github.com/yuchengwen393" target="_blank" rel="noreferrer">GitHub</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> 文昱塍 · 大连民族大学</span>
+        <span>HTML / CSS / 63.9M PARAMS</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/site.js"></script>
+  <script src="js/posts.js"></script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+{
+  "site": {
+    "title": "模型手记",
+    "author": "文昱塍",
+    "description": "从分词器到预训练、SFT、插件与部署：一个物联网工程学生的八天模型实践记录。",
+    "since": "2026"
+  },
+  "posts": [
+    {
+      "id": "10-27-this-blog",
+      "title": "这个博客，和它背后的 64M 小模型",
+      "subtitle": "把训练好的权重放进网页：静态站点 + 本地推理 API",
+      "date": "2026-10-27",
+      "tags": ["部署", "模型", "工程"],
+      "summary": "博客本身也是一个项目：静态页面放在 GitHub Pages，对话能力来自 10.21 训练出的 6391 万参数权重。这篇记录它的结构、接口与边界。",
+      "readingTime": "6 min"
+    },
+    {
+      "id": "10-27-debug-deploy",
+      "title": "Bug 排查、部署，以及一个项目该有的流程",
+      "subtitle": "从 Network 面板到 PRD，从 Cloudflare 到 Docker",
+      "date": "2026-10-27",
+      "tags": ["调试", "部署", "流程"],
+      "summary": "页面空白不一定是后端挂了，部署成功也不等于访问正常。把今天的排查顺序、状态码、三种部署方式和三份文档整理成可复用的清单。",
+      "readingTime": "8 min"
+    },
+    {
+      "id": "10-26-imagegrab",
+      "title": "ImageGrab：把详情页的图片一次带走",
+      "subtitle": "Manifest V3 插件、懒加载、Canvas 与自写 ZIP",
+      "date": "2026-10-26",
+      "tags": ["Chrome 扩展", "前端", "项目"],
+      "summary": "从一句需求到一个能用的插件：9 张商品图、勾选下载、PNG 转换、多张打包，以及一个真正可以访问的 Pages 域名。",
+      "readingTime": "7 min"
+    },
+    {
+      "id": "10-23-zero-code",
+      "title": "AI 零代码与 AI 编程：两个下午，两个应用",
+      "subtitle": "Bolt、秒哒与 Cursor 各自适合做什么",
+      "date": "2026-10-23",
+      "tags": ["AI 编程", "零代码", "项目"],
+      "summary": "图片水印助手和 AI 翻译助手的本地演示版，让我第一次把「需求描述 → 生成 → 测试 → 回退」走完。",
+      "readingTime": "6 min"
+    },
+    {
+      "id": "10-22-sft-lora",
+      "title": "SFT 与 LoRA：让模型学会对话",
+      "subtitle": "Chat Template、Loss Mask 与 14,152 步",
+      "date": "2026-10-22",
+      "tags": ["SFT", "LoRA", "训练"],
+      "summary": "预训练教会模型续写，SFT 才教会它回答。记录 Chat Template、只对 assistant 计算 loss，以及 LoRA 的注入与合并。",
+      "readingTime": "7 min"
+    },
+    {
+      "id": "10-21-pretrain",
+      "title": "19,848 步：第一次预训练",
+      "subtitle": "1.24GB 语料、8 层 768 维、43 分钟",
+      "date": "2026-10-21",
+      "tags": ["预训练", "MiniMind", "训练"],
+      "summary": "loss 从 5 点多降到 2.4378，模型学会了分行、分点，却还不会对话。预训练只是把语言规律压进权重。",
+      "readingTime": "6 min"
+    },
+    {
+      "id": "10-20-transformer",
+      "title": "把 Attention 写出来",
+      "subtitle": "RoPE、RMSNorm、SwiGLU 与一个 8 层 GPT",
+      "date": "2026-10-20",
+      "tags": ["Transformer", "PyTorch", "基础"],
+      "summary": "从矩阵形状开始，手写多头注意力、因果掩码和 KV Cache，最后拼成一个能前向传播的模型。",
+      "readingTime": "7 min"
+    },
+    {
+      "id": "10-19-tokenizer",
+      "title": "从 token 开始",
+      "subtitle": "手写分词器与 LLM 的第一课",
+      "date": "2026-10-19",
+      "tags": ["分词器", "LLM", "基础"],
+      "summary": "模型看见的不是汉字，而是数字。简单分词器与 BPE 的差别，决定了 6400 个 token 如何切分一整段中文。",
+      "readingTime": "5 min"
+    }
+  ]
+}

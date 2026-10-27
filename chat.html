@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>模型对话 · 模型手记</title>
+  <meta name="description" content="和课程中从零训练的 MiniMind-768 SFT 模型对话。">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="chat">
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">文</span>
+        <span class="brand-text">模型手记<small>Yucheng&nbsp;Notes</small></span>
+      </a>
+      <nav class="nav" id="nav">
+        <a data-nav="home" href="index.html">首页</a>
+        <a data-nav="posts" href="posts.html">文章</a>
+        <a data-nav="projects" href="projects.html">项目</a>
+        <a data-nav="about" href="about.html">关于</a>
+        <a class="nav-cta" data-nav="chat" href="chat.html">和模型对话</a>
+      </nav>
+      <button class="menu-btn" id="menuBtn" aria-label="打开菜单" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-head">
+      <div class="wrap">
+        <div class="eyebrow">Chat · 本地推理</div>
+        <h1>和我的小模型聊聊</h1>
+        <p>
+          这不是云端大模型。它是我在 10.21 / 10.22 从零训练的 MiniMind-768，
+          6391 万参数，加载 SFT 权重后在本机 CPU 上推理。
+        </p>
+      </div>
+    </section>
+
+    <section class="wrap chat-page">
+      <div class="chat-status-bar">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">正在检查模型服务……</span>
+        <span style="margin-left:auto;">MiniMind-768 SFT · 8 layers · hidden 768</span>
+      </div>
+
+      <div class="chat-shell">
+        <div class="chat-main">
+          <div class="chat-log" id="chatLog">
+            <div class="msg assistant">
+              <span class="msg-label">MiniMind</span>
+              <div class="msg-bubble">你好，我是 MiniMind-768。我是课程里从零训练的小模型，只有 6391 万参数，知识有限，但我会认真回答。你可以问我关于 Transformer、训练过程，或者随便聊两句。</div>
+              <span class="msg-stats">SYSTEM · READY</span>
+            </div>
+          </div>
+
+          <form class="chat-form" id="chatForm">
+            <div class="chat-input-row">
+              <textarea class="chat-input" id="chatInput" rows="1" placeholder="输入问题，Enter 发送，Shift + Enter 换行" aria-label="输入消息"></textarea>
+              <button class="send-btn" id="sendBtn" type="submit">发送</button>
+            </div>
+            <p class="chat-hint" id="chatHint">模型回答可能不准确，请以课程代码与实验为准。</p>
+          </form>
+        </div>
+
+        <aside class="chat-side">
+          <div>
+            <h3>Model</h3>
+            <div class="model-card">
+              <strong>MiniMind-768 SFT</strong>
+              <span>8 层 · 768 维 · 12 头<br>63.9M 参数 · CPU 推理</span>
+            </div>
+          </div>
+
+          <div>
+            <h3>可以这样问</h3>
+            <div class="prompt-list">
+              <button class="prompt-btn" data-prompt="你好，请用一句话介绍你自己。">你好，请用一句话介绍你自己。</button>
+              <button class="prompt-btn" data-prompt="什么是 Transformer？请简单解释。">什么是 Transformer？</button>
+              <button class="prompt-btn" data-prompt="用一句话解释 LoRA。">用一句话解释 LoRA。</button>
+              <button class="prompt-btn" data-prompt="给我讲一个关于程序员的短笑话。">讲一个程序员笑话</button>
+            </div>
+          </div>
+
+          <div>
+            <h3>Session</h3>
+            <button class="clear-btn" id="clearBtn" type="button">清空对话</button>
+          </div>
+
+          <p class="chat-note">
+            对话由本机的 Flask 服务提供。若显示「模型服务离线」，说明推理进程或公网隧道未启动；
+            博客文章仍可正常阅读。
+          </p>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-top">
+        <div class="footer-mark">文昱塍</div>
+        <div class="footer-links">
+          <a href="posts.html">文章</a>
+          <a href="projects.html">项目</a>
+          <a href="chat.html">模型对话</a>
+          <a href="https://github.com/yuchengwen393" target="_blank" rel="noreferrer">GitHub</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> 文昱塍 · 大连民族大学</span>
+        <span>HTML / CSS / 63.9M PARAMS</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/site.js"></script>
+  <script src="js/chat.js"></script>
+</body>
+</html>

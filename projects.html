@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>项目 · 模型手记</title>
+  <meta name="description" content="从模型训练到浏览器插件的课程项目清单。">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="projects">
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">文</span>
+        <span class="brand-text">模型手记<small>Yucheng&nbsp;Notes</small></span>
+      </a>
+      <nav class="nav" id="nav">
+        <a data-nav="home" href="index.html">首页</a>
+        <a data-nav="posts" href="posts.html">文章</a>
+        <a data-nav="projects" href="projects.html">项目</a>
+        <a data-nav="about" href="about.html">关于</a>
+        <a class="nav-cta" data-nav="chat" href="chat.html">和模型对话</a>
+      </nav>
+      <button class="menu-btn" id="menuBtn" aria-label="打开菜单" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-head">
+      <div class="wrap">
+        <div class="eyebrow">Works · 2026</div>
+        <h1>项目清单</h1>
+        <p>五个从课程里长出来的东西。两个有公网域名，一个是这个博客本身，其余是本地演示版。</p>
+      </div>
+    </section>
+
+    <section class="wrap" style="padding: 42px 0 80px;">
+      <div class="project-grid">
+        <a class="project-card reveal" href="https://yuchengwen393.github.io/imagegrab/" target="_blank" rel="noreferrer">
+          <div class="p-top"><span>01 / CHROME EXTENSION</span><span>已上线</span></div>
+          <h3>ImageGrab 图片提取插件</h3>
+          <p>
+            Manifest V3 电商图片提取插件：识别详情页、扫描懒加载属性、过滤 Logo 与占位图，
+            新标签页集中预览，单张下载 PNG，多张打包 ZIP。纯前端处理，不上传图片。
+          </p>
+          <div class="project-tags">
+            <span class="tag">JavaScript</span><span class="tag">MV3</span><span class="tag">Canvas</span><span class="tag">ZIP</span>
+          </div>
+          <span class="project-link">yuchengwen393.github.io/imagegrab</span>
+        </a>
+
+        <a class="project-card reveal" href="https://github.com/yuchengwen393/imagegrab" target="_blank" rel="noreferrer">
+          <div class="p-top"><span>02 / MODEL</span><span>已训练</span></div>
+          <h3>MiniMind-768 预训练与 SFT</h3>
+          <p>
+            8 层、768 维、6391 万参数的语言模型。1.24GB 语料预训练 19,848 步，
+            SFT 14,152 步；权重用于本站对话页，CPU 推理约 30 tokens/s。
+          </p>
+          <div class="project-tags">
+            <span class="tag">PyTorch</span><span class="tag">Transformer</span><span class="tag">SFT</span><span class="tag">LoRA</span>
+          </div>
+          <span class="project-link">GitHub 仓库</span>
+        </a>
+
+        <a class="project-card reveal" href="chat.html">
+          <div class="p-top"><span>03 / SITE</span><span>本站</span></div>
+          <h3>模型手记 + 对话</h3>
+          <p>
+            无框架静态博客：首页、归档、文章、项目、关于与对话六个页面。
+            文章用 Markdown 维护，对话页调用 Flask 推理接口，加载本地 SFT 权重。
+          </p>
+          <div class="project-tags">
+            <span class="tag">HTML / CSS</span><span class="tag">Flask</span><span class="tag">GitHub Pages</span>
+          </div>
+          <span class="project-link">打开对话页</span>
+        </a>
+
+        <div class="project-card reveal">
+          <div class="p-top"><span>04 / TOOL</span><span>本地演示</span></div>
+          <h3>图片水印助手</h3>
+          <p>
+            单文件网页工具：批量上传，文字 / 图片两种水印，九宫格位置与平铺，
+            透明度与边距可调，实时预览并批量下载。
+          </p>
+          <div class="project-tags">
+            <span class="tag">Canvas</span><span class="tag">File API</span><span class="tag">零代码</span>
+          </div>
+        </div>
+
+        <div class="project-card reveal">
+          <div class="p-top"><span>05 / TOOL</span><span>本地演示</span></div>
+          <h3>AI 翻译助手</h3>
+          <p>
+            中英互译、一键复制、学习建议与本地历史记录。演示版用本地 SVG 插画，
+            避免外部图片服务的额度限制。
+          </p>
+          <div class="project-tags">
+            <span class="tag">JavaScript</span><span class="tag">API</span><span class="tag">localStorage</span>
+          </div>
+        </div>
+      </div>
+
+      <p style="margin-top: 30px; font-size: 12.5px; color: var(--muted);">
+        说明：课程作业中的本地演示版未部署到公网，源码保留在 10.23 / 10.26 目录。
+      </p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-top">
+        <div class="footer-mark">文昱塍</div>
+        <div class="footer-links">
+          <a href="posts.html">文章</a>
+          <a href="projects.html">项目</a>
+          <a href="chat.html">模型对话</a>
+          <a href="https://github.com/yuchengwen393" target="_blank" rel="noreferrer">GitHub</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> 文昱塍 · 大连民族大学</span>
+        <span>HTML / CSS / 63.9M PARAMS</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/site.js"></script>
+</body>
+</html>
