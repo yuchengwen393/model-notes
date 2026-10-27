@@ -19,6 +19,12 @@
 
 文章正文在 `posts/*.md`，索引在 `data/posts.json`。
 
+## 设计文档
+
+- `PRD.md`：目标、用户、功能范围、验收标准；
+- `TECH_DESIGN.md`：静态站 + Flask 推理服务的架构与接口；
+- `AGENTS.md`：开发约定、运行命令与测试清单。
+
 ## 本地运行
 
 ```powershell
