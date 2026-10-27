@@ -48,7 +48,16 @@ cd 10.27\chat-service
 
 ## 部署
 
-博客是纯静态站点，推送到 GitHub 后在仓库 Settings → Pages 选择 `main` 分支、根目录即可。对话接口需要另外启动本机服务与公网隧道，并把地址写入 `data/config.json` 的 `chatApi`。localhost.run 的免费隧道有效期有限，到期后重新启动并更新该地址即可。
+博客是纯静态站点，推送到 GitHub 后在仓库 Settings → Pages 选择 `main` 分支、根目录即可。对话接口需要另外启动本机服务与公网隧道：
+
+```powershell
+cd 10.27\chat-service
+.\.venv\Scripts\python.exe app.py
+# 另开窗口
+.\cloudflared.exe tunnel --url http://127.0.0.1:5050
+```
+
+把输出的 `https://xxxx.trycloudflare.com` 写入 `data/config.json` 的 `chatApi`。隧道关闭或重启后地址会变化，更新该文件即可；页面每次加载都会重新读取配置。
 
 ## 边界
 
