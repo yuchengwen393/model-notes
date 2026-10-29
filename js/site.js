@@ -4,8 +4,9 @@
   const menuBtn = document.getElementById("menuBtn");
 
   if (nav) {
+    const activeNav = page === "post" ? "posts" : page;
     nav.querySelectorAll("a[data-nav]").forEach((link) => {
-      if (link.dataset.nav === page) link.setAttribute("aria-current", "page");
+      if (link.dataset.nav === activeNav) link.setAttribute("aria-current", "page");
     });
   }
 
@@ -44,24 +45,58 @@
     el.textContent = new Date().getFullYear();
   });
 
-  // 站点标题从内容 API 读取，同步到页头品牌、页脚名称与浏览器标题。
-  function applySiteTitle() {
+  // 站点资料统一从内容 API 读取，同步到侧栏、页脚、标题与个人信息卡。
+  function applySiteData() {
     if (!window.BlogAPI) return;
     window.BlogAPI.getSite()
       .then((site) => {
-        const title = site && site.title ? String(site.title).trim() : "";
-        if (!title) return;
-        document.querySelectorAll("[data-site-title]").forEach((el) => {
-          el.textContent = title;
-        });
-        if (document.title.includes("模型手记")) {
-          document.title = document.title.replaceAll("模型手记", title);
+        if (!site) return;
+
+        const title = site.title ? String(site.title).trim() : "";
+        if (title) {
+          document.querySelectorAll("[data-site-title]").forEach((el) => {
+            el.textContent = title;
+          });
+          // 首页标题是「站点名 · 副标题」，内页标题是「页面名 · 站点名」。
+          if (document.title.startsWith("模型手记 · ")) {
+            document.title = document.title.replace(/^模型手记/, title);
+          } else if (document.title.endsWith("· 模型手记")) {
+            document.title = document.title.replace(/· 模型手记$/, `· ${title}`);
+          }
+        }
+
+        const tagline = site.tagline ? String(site.tagline).trim() : "";
+        if (tagline) {
+          document.querySelectorAll("[data-site-tagline]").forEach((el) => {
+            el.textContent = tagline;
+          });
+        }
+
+        if (site.repo) {
+          document.querySelectorAll("[data-site-repo]").forEach((link) => {
+            link.href = site.repo;
+          });
+        }
+
+        const profile = site.profile || {};
+        const card = document.getElementById("sidebarProfile");
+        if (card && (profile.nickname || profile.role)) {
+          card.hidden = false;
+          const name = document.getElementById("sidebarName");
+          const role = document.getElementById("sidebarRole");
+          const avatar = document.getElementById("sidebarAvatar");
+          if (name && profile.nickname) name.textContent = profile.nickname;
+          if (role) role.textContent = profile.role || "";
+          if (avatar && profile.avatar) {
+            avatar.src = profile.avatar;
+            avatar.alt = `${profile.nickname || title || "站点"}头像`;
+          }
         }
       })
       .catch(() => {
-        /* 读取失败时保留 HTML 中的静态标题。 */
+        /* 读取失败时保留 HTML 中的静态标题与资料。 */
       });
   }
 
-  applySiteTitle();
+  applySiteData();
 })();

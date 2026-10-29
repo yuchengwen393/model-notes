@@ -16,6 +16,7 @@
         <span class="brand-mark">M</span>
         <span class="brand-text"><span data-site-title>模型手记</span><small>Model&nbsp;Notes</small></span>
       </a>
+      <div class="sidebar-label">栏目 / Sections</div>
       <nav class="nav" id="nav">
         <a data-nav="home" href="index.html">首页</a>
         <a data-nav="posts" href="posts.html">文章</a>
@@ -23,6 +24,19 @@
         <a data-nav="about" href="about.html">关于</a>
         <a class="nav-cta" data-nav="chat" href="chat.html">和模型对话</a>
       </nav>
+      <div class="sidebar-bottom">
+        <div class="sidebar-profile" id="sidebarProfile" hidden>
+          <img class="sidebar-avatar" id="sidebarAvatar" src="favicon.svg" alt="站点头像">
+          <div class="sidebar-profile-text">
+            <strong id="sidebarName">模型手记</strong>
+            <span id="sidebarRole"></span>
+          </div>
+        </div>
+        <div class="sidebar-foot">
+          <a href="admin.html" rel="nofollow">内容管理 <span>→</span></a>
+          <a href="https://github.com/yuchengwen393/model-notes" target="_blank" rel="noreferrer" data-site-repo>GitHub <span>↗</span></a>
+        </div>
+      </div>
       <button class="menu-btn" id="menuBtn" aria-label="打开菜单" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
@@ -43,6 +57,7 @@
               <span class="line">把模型</span>
               <span class="line">写进<em>网页</em>里</span>
             </h1>
+            <p class="hero-tagline" data-site-tagline>把训练过的模型，放到能用的地方。</p>
             <p class="hero-lead">
               从 6400 个 token 的分词器开始，训练一个 6391 万参数的小模型，
               再把它装进插件、官网和这个博客。这里记录八天里真正跑通的链路，
@@ -100,7 +115,7 @@
         </div>
 
         <div class="hero-stats">
-          <div><b>8</b><span>篇手记</span></div>
+          <div><b data-stat="posts">8</b><span>篇手记</span></div>
           <div><b>63.9M</b><span>模型参数</span></div>
           <div><b>34,000</b><span>训练步数</span></div>
           <div><b>3</b><span>条完整链路</span></div>
@@ -183,34 +198,7 @@
           <a class="more-link" href="projects.html">查看全部 →</a>
         </div>
 
-        <div class="project-grid">
-          <a class="project-card reveal" href="https://yuchengwen393.github.io/imagegrab/" target="_blank" rel="noreferrer">
-            <div class="p-top"><span>01</span><span>Chrome MV3</span></div>
-            <h3>ImageGrab</h3>
-            <p>电商详情页图片提取插件：懒加载扫描、勾选、PNG 转换与 ZIP 打包，已有公网域名。</p>
-            <div class="project-tags"><span class="tag">Manifest V3</span><span class="tag">Canvas</span><span class="tag">ZIP</span></div>
-            <span class="project-link">打开站点</span>
-          </a>
-          <a class="project-card reveal" href="https://github.com/yuchengwen393/model-notes/imagegrab" target="_blank" rel="noreferrer">
-            <div class="p-top"><span>02</span><span>PyTorch</span></div>
-            <h3>MiniMind-768</h3>
-            <p>8 层、768 维、6391 万参数。预训练 19,848 步，SFT 14,152 步，权重就是本站对话的后端。</p>
-            <div class="project-tags"><span class="tag">Transformer</span><span class="tag">SFT</span><span class="tag">CPU 推理</span></div>
-            <span class="project-link">查看仓库</span>
-          </a>
-          <div class="project-card reveal">
-            <div class="p-top"><span>03</span><span>Canvas</span></div>
-            <h3>图片水印助手</h3>
-            <p>批量上传、文字 / 图片水印、九宫格位置与平铺、实时预览和批量下载。</p>
-            <div class="project-tags"><span class="tag">零代码</span><span class="tag">Canvas</span></div>
-          </div>
-          <div class="project-card reveal">
-            <div class="p-top"><span>04</span><span>Web API</span></div>
-            <h3>AI 翻译助手</h3>
-            <p>中英互译、复制、学习建议与历史记录，演示版使用本地 SVG 插画避免外部额度。</p>
-            <div class="project-tags"><span class="tag">JavaScript</span><span class="tag">localStorage</span></div>
-          </div>
-        </div>
+        <div class="project-grid" id="homeProjects" data-limit="4"></div>
       </div>
     </section>
 
@@ -245,7 +233,7 @@
           <a href="posts.html">文章</a>
           <a href="projects.html">项目</a>
           <a href="chat.html">模型对话</a>
-          <a href="https://github.com/yuchengwen393/model-notes" target="_blank" rel="noreferrer">GitHub</a>
+          <a href="https://github.com/yuchengwen393/model-notes" target="_blank" rel="noreferrer" data-site-repo>GitHub</a>
           <a href="admin.html" rel="nofollow">内容管理</a>
         </div>
       </div>
@@ -256,8 +244,9 @@
     </div>
   </footer>
 
-  <script src="js/blog-api.js"></script>
-  <script src="js/site.js"></script>
-  <script src="js/home.js"></script>
+  <script src="js/blog-api.js?v=20261029b"></script>
+  <script src="js/projects.js?v=20261029b"></script>
+  <script src="js/site.js?v=20261029b"></script>
+  <script src="js/home.js?v=20261029b"></script>
 </body>
 </html>

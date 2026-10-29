@@ -16,6 +16,7 @@
         <span class="brand-mark">M</span>
         <span class="brand-text"><span data-site-title>模型手记</span><small>Model&nbsp;Notes</small></span>
       </a>
+      <div class="sidebar-label">栏目 / Sections</div>
       <nav class="nav" id="nav">
         <a data-nav="home" href="index.html">首页</a>
         <a data-nav="posts" href="posts.html">文章</a>
@@ -23,6 +24,19 @@
         <a data-nav="about" href="about.html">关于</a>
         <a class="nav-cta" data-nav="chat" href="chat.html">和模型对话</a>
       </nav>
+      <div class="sidebar-bottom">
+        <div class="sidebar-profile" id="sidebarProfile" hidden>
+          <img class="sidebar-avatar" id="sidebarAvatar" src="favicon.svg" alt="站点头像">
+          <div class="sidebar-profile-text">
+            <strong id="sidebarName">模型手记</strong>
+            <span id="sidebarRole"></span>
+          </div>
+        </div>
+        <div class="sidebar-foot">
+          <a href="admin.html" rel="nofollow">内容管理 <span>→</span></a>
+          <a href="https://github.com/yuchengwen393/model-notes" target="_blank" rel="noreferrer" data-site-repo>GitHub <span>↗</span></a>
+        </div>
+      </div>
       <button class="menu-btn" id="menuBtn" aria-label="打开菜单" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
@@ -34,7 +48,7 @@
       <div class="wrap">
         <div class="eyebrow">Works · 2026</div>
         <h1>项目清单</h1>
-        <p>五个从课程里长出来的东西。两个有公网域名，一个是这个博客本身，其余是本地演示版。</p>
+        <p><span id="projectCount">5</span> 个从课程里长出来的东西。两个有公网域名，一个是这个博客本身，其余是本地演示版。</p>
       </div>
     </section>
 
@@ -55,7 +69,7 @@
           <a href="posts.html">文章</a>
           <a href="projects.html">项目</a>
           <a href="chat.html">模型对话</a>
-          <a href="https://github.com/yuchengwen393/model-notes" target="_blank" rel="noreferrer">GitHub</a>
+          <a href="https://github.com/yuchengwen393/model-notes" target="_blank" rel="noreferrer" data-site-repo>GitHub</a>
           <a href="admin.html" rel="nofollow">内容管理</a>
         </div>
       </div>
@@ -66,8 +80,8 @@
     </div>
   </footer>
 
-  <script src="js/blog-api.js"></script>
-  <script src="js/projects.js"></script>
-  <script src="js/site.js"></script>
+  <script src="js/blog-api.js?v=20261029b"></script>
+  <script src="js/projects.js?v=20261029b"></script>
+  <script src="js/site.js?v=20261029b"></script>
 </body>
 </html>

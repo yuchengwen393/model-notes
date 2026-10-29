@@ -2,6 +2,13 @@
 (function () {
   const tokenInput = document.getElementById("tokenInput");
   const tokenStatus = document.getElementById("tokenStatus");
+  const loginCard = document.getElementById("loginCard");
+  const adminWorkspace = document.getElementById("adminWorkspace");
+  const adminNav = document.getElementById("adminNav");
+  const adminBadge = document.getElementById("adminBadge");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const adminPostCount = document.getElementById("adminPostCount");
+  const adminProjectCount = document.getElementById("adminProjectCount");
   const siteCard = document.getElementById("siteCard");
   const profileCard = document.getElementById("profileCard");
   const projectCard = document.getElementById("projectCard");
@@ -11,7 +18,6 @@
   const profileStatus = document.getElementById("profileStatus");
   const projectList = document.getElementById("projectList");
   const postSelect = document.getElementById("postSelect");
-  const postForm = document.getElementById("postForm") || document.getElementById("postCard");
   const postId = document.getElementById("postId");
   const postTitle = document.getElementById("postTitle");
   const postSubtitle = document.getElementById("postSubtitle");
@@ -21,6 +27,7 @@
   const postReadingTime = document.getElementById("postReadingTime");
   const postContent = document.getElementById("postContent");
   const postStatus = document.getElementById("postStatus");
+  const panels = Array.from(document.querySelectorAll("[data-admin-panel]"));
   let currentPostId = null;
 
   function esc(value) {
@@ -34,6 +41,18 @@
   function status(element, text, error = false) {
     element.textContent = text;
     element.style.color = error ? "#a83a24" : "var(--muted)";
+  }
+
+  // 后台左侧模块切换：每次只显示一个面板。
+  function showPanel(name) {
+    panels.forEach((panel) => {
+      panel.hidden = panel.dataset.adminPanel !== name;
+    });
+    adminNav.querySelectorAll("[data-admin-target]").forEach((btn) => {
+      const active = btn.dataset.adminTarget === name;
+      btn.classList.toggle("is-active", active);
+      btn.setAttribute("aria-current", active ? "page" : "false");
+    });
   }
 
   async function apiBase() {
@@ -66,6 +85,20 @@
       if (form[key]) form[key].value = site[key] || "";
     });
     if (form.intro) form.intro.value = Array.isArray(site.intro) ? site.intro.join("\n") : site.intro || "";
+    if (site.title) {
+      document.querySelectorAll("[data-site-title]").forEach((el) => {
+        el.textContent = site.title;
+      });
+      if (document.title.endsWith("· 模型手记")) {
+        document.title = document.title.replace(/· 模型手记$/, `· ${site.title}`);
+      }
+    }
+    const repoLinks = document.querySelectorAll("[data-site-repo]");
+    if (site.repo) {
+      repoLinks.forEach((link) => {
+        link.href = site.repo;
+      });
+    }
   }
 
   function fillProfile(profile) {
@@ -183,7 +216,7 @@
     }
   }
 
-  async function loadAll() {
+  async function loadAll(preservePostId = null) {
     const [site, projects, posts] = await Promise.all([
       request("/api/site"),
       request("/api/projects"),
@@ -192,12 +225,18 @@
     fillSite(site);
     fillProfile(site.profile || {});
     renderProjects(projects.projects || []);
+    if (adminPostCount) adminPostCount.textContent = (posts.posts || []).length;
+    if (adminProjectCount) adminProjectCount.textContent = (projects.projects || []).length;
     postSelect.innerHTML = (posts.posts || [])
       .map((post) => `<option value="${esc(post.id)}">${esc(post.title)}</option>`)
       .join("");
-    if (posts.posts && posts.posts.length) {
-      await loadPost(posts.posts[0].id);
-      postSelect.value = posts.posts[0].id;
+
+    const list = posts.posts || [];
+    if (list.length) {
+      const desired = preservePostId || currentPostId;
+      const next = list.some((post) => post.id === desired) ? desired : list[0].id;
+      await loadPost(next);
+      postSelect.value = next;
     } else {
       clearPostForm();
     }
@@ -213,10 +252,20 @@
     try {
       await request("/api/admin/session");
       status(tokenStatus, "口令正确，已解锁。");
-      [siteCard, profileCard, projectCard, postCard].forEach((card) => (card.hidden = false));
+      document.body.classList.add("is-authed");
+      loginCard.hidden = true;
+      adminWorkspace.hidden = false;
+      adminBadge.textContent = "已登录";
+      logoutBtn.hidden = false;
+      showPanel("site");
       await loadAll();
     } catch (error) {
       sessionStorage.removeItem("modelnotes_admin_token");
+      document.body.classList.remove("is-authed");
+      loginCard.hidden = false;
+      adminWorkspace.hidden = true;
+      adminBadge.textContent = "未登录";
+      logoutBtn.hidden = true;
       status(tokenStatus, error.message, true);
     }
   }
@@ -224,6 +273,31 @@
   document.getElementById("saveToken").addEventListener("click", validateToken);
   tokenInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter") validateToken();
+  });
+
+  adminNav.addEventListener("click", (event) => {
+    const btn = event.target.closest("[data-admin-target]");
+    if (!btn) return;
+    if (adminWorkspace.hidden) {
+      status(tokenStatus, "请先输入口令并验证。", true);
+      tokenInput.focus();
+      return;
+    }
+    showPanel(btn.dataset.adminTarget);
+  });
+
+  logoutBtn.addEventListener("click", () => {
+    sessionStorage.removeItem("modelnotes_admin_token");
+    document.body.classList.remove("is-authed");
+    loginCard.hidden = false;
+    adminWorkspace.hidden = true;
+    adminBadge.textContent = "未登录";
+    logoutBtn.hidden = true;
+    tokenInput.value = "";
+    if (adminPostCount) adminPostCount.textContent = "—";
+    if (adminProjectCount) adminProjectCount.textContent = "—";
+    status(tokenStatus, "已退出登录。");
+    showPanel("site");
   });
 
   siteForm.addEventListener("submit", async (event) => {
@@ -244,6 +318,16 @@
     try {
       await request("/api/admin/site", { method: "PUT", body: JSON.stringify(payload) });
       status(document.getElementById("siteStatus"), "站点信息已保存。");
+      if (payload.title) {
+        document.querySelectorAll("[data-site-title]").forEach((el) => {
+          el.textContent = payload.title;
+        });
+      }
+      if (payload.repo) {
+        document.querySelectorAll("[data-site-repo]").forEach((link) => {
+          link.href = payload.repo;
+        });
+      }
     } catch (error) {
       status(document.getElementById("siteStatus"), error.message, true);
     }
@@ -294,8 +378,8 @@
       } else {
         await request("/api/admin/posts", { method: "POST", body: JSON.stringify(payload) });
       }
+      await loadAll(payload.id);
       status(document.getElementById("postStatus"), "文章已保存。");
-      await loadAll();
     } catch (error) {
       status(document.getElementById("postStatus"), error.message, true);
     }
@@ -307,8 +391,9 @@
     if (!currentPostId || !confirm("确定删除这篇文章？")) return;
     try {
       await request(`/api/admin/posts/${encodeURIComponent(currentPostId)}`, { method: "DELETE" });
-      status(document.getElementById("postStatus"), "文章已删除。");
+      currentPostId = null;
       await loadAll();
+      status(document.getElementById("postStatus"), "文章已删除。");
     } catch (error) {
       status(document.getElementById("postStatus"), error.message, true);
     }

@@ -3,18 +3,31 @@
   const countEl = document.getElementById("resultCount");
   const searchEl = document.getElementById("searchInput");
   const tagWrap = document.getElementById("tagFilters");
+  const headingCount = document.getElementById("postsHeadingCount");
   if (!listEl) return;
 
   let posts = [];
   let activeTag = new URLSearchParams(location.search).get("tag") || "全部";
   let query = "";
 
+  function esc(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;");
+  }
+
+  function tagsOf(post) {
+    return Array.isArray(post.tags) ? post.tags : [];
+  }
+
   function renderTags() {
-    const tags = ["全部", ...Array.from(new Set(posts.flatMap((p) => p.tags)))];
+    const tags = ["全部", ...Array.from(new Set(posts.flatMap(tagsOf)))];
     tagWrap.innerHTML = tags
       .map(
         (tag) =>
-          `<button class="filter-chip ${tag === activeTag ? "is-active" : ""}" data-tag="${tag}">${tag}</button>`
+          `<button class="filter-chip ${tag === activeTag ? "is-active" : ""}" data-tag="${esc(tag)}">${esc(tag)}</button>`
       )
       .join("");
   }
@@ -22,8 +35,9 @@
   function render() {
     const keyword = query.trim().toLowerCase();
     const filtered = posts.filter((post) => {
-      const matchTag = activeTag === "全部" || post.tags.includes(activeTag);
-      const haystack = [post.title, post.summary, post.subtitle, ...post.tags].join(" ").toLowerCase();
+      const tags = tagsOf(post);
+      const matchTag = activeTag === "全部" || tags.includes(activeTag);
+      const haystack = [post.title, post.summary, post.subtitle, ...tags].join(" ").toLowerCase();
       return matchTag && (!keyword || haystack.includes(keyword));
     });
 
@@ -34,28 +48,31 @@
     }
 
     listEl.innerHTML = filtered
-      .map(
-        (post, index) => `
+      .map((post, index) => {
+        const tags = tagsOf(post);
+        const date = (post.date || "").replace(/-/g, ".");
+        return `
         <a class="post-item" href="post.html?id=${encodeURIComponent(post.id)}">
           <span class="post-no">${String(index + 1).padStart(2, "0")}</span>
           <div>
-            <h3>${post.title}</h3>
-            <p>${post.summary}</p>
+            <h3>${esc(post.title || "未命名文章")}</h3>
+            <p>${esc(post.summary || "")}</p>
           </div>
           <div class="post-meta">
-            <span>${post.date.replace(/-/g, ".")}</span>
-            <span class="tag">${post.tags[0]}</span>
-            <span>${post.readingTime}</span>
+            <span>${esc(date)}</span>
+            <span class="tag">${esc(tags[0] || "未分类")}</span>
+            <span>${esc(post.readingTime || "")}</span>
           </div>
-        </a>`
-      )
+        </a>`;
+      })
       .join("");
   }
 
   window.BlogAPI.getPosts()
     .then((data) => {
-      posts = data.posts;
-      if (!posts.some((p) => p.tags.includes(activeTag))) activeTag = "全部";
+      posts = Array.isArray(data.posts) ? data.posts : [];
+      if (headingCount) headingCount.textContent = posts.length;
+      if (!posts.some((post) => tagsOf(post).includes(activeTag))) activeTag = "全部";
       renderTags();
       render();
     })

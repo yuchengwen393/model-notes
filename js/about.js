@@ -29,6 +29,7 @@
 
       if (!profile.nickname && !profile.role && !profile.bio) return;
       card.hidden = false;
+      card.classList.add("is-visible");
 
       if (profile.nickname) nickname.textContent = profile.nickname;
       role.textContent = profile.role || "";
