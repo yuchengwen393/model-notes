@@ -8,8 +8,17 @@
   "type": "个人技术博客 + 模型对话 Demo",
   "theme": "语言模型训练 · 前端工程 · AI 工具",
   "time": "2026 年 10 月",
-  "tech": "HTML / CSS / JavaScript · Flask · PyTorch",
+  "tech": "HTML / CSS / JavaScript · Node.js · PyTorch",
   "model": "MiniMind-768 SFT · 6391 万参数",
   "domain": "yuchengwen393.github.io/model-notes",
-  "repo": "https://github.com/yuchengwen393/model-notes"
+  "repo": "https://github.com/yuchengwen393/model-notes",
+  "profile": {
+    "nickname": "模型手记",
+    "role": "独立开发者 · 课程实践",
+    "email": "",
+    "location": "",
+    "avatar": "favicon.svg",
+    "skills": "PyTorch / Transformers / JavaScript / Node.js",
+    "bio": "把训练过的模型，放到能用的地方。"
+  }
 }

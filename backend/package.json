@@ -1,0 +1,13 @@
+{
+  "name": "model-notes-content-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "模型手记个人网站内容后端：静态托管、内容 API 与管理 API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

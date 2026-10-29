@@ -10,7 +10,7 @@
 
 - 前端：6 个前台 HTML 页面 + 1 个管理页，原生 CSS、原生 JavaScript；
 - 内容：8 篇 Markdown 文章，静态索引在 `data/posts.json`，在线数据在 `backend/blog.db`；
-- 内容后端：本机 Flask + SQLite，托管静态页面，提供 `/api/site`、`/api/projects`、`/api/posts` 与 `/api/admin/*`；
+- 内容后端：本机 Node.js + `node:sqlite`，托管静态页面，提供 `/api/site`、`/api/projects`、`/api/posts` 与 `/api/admin/*`；
 - 模型后端：本机 Flask 加载 MiniMind-768 SFT 权重，提供 `/api/health` 与 `/api/chat`；
 - 公网：Cloudflare Quick Tunnel 分别暴露 `127.0.0.1:8100` 与 `127.0.0.1:5050`；
 - 配置：`chatApi` / `contentApi` 在 `data/config.json`，页面每次加载以 `no-store` 读取。
@@ -36,15 +36,15 @@ blog/                          # 仓库根目录（Pages 根目录）
 ├── js/posts.js                # 归档筛选
 ├── js/post.js                 # 详情、进度条、相关阅读、上下篇
 ├── js/projects.js             # 项目卡片动态渲染
-├── js/about.js                # 关于页站点信息
-├── js/admin.js                # 管理页：口令、站点、项目、文章
+├── js/about.js                # 关于页站点信息与个人信息卡片
+├── js/admin.js                # 管理页：口令、站点、个人信息、项目、文章
 ├── js/markdown.js             # 轻量 Markdown 渲染
 ├── js/chat.js                 # 对话状态机（当前引用为 chat.js?v=2）
-├── backend/app.py             # 内容后端：静态托管 + 公开 API + 管理 API
-├── backend/requirements.txt   # Flask
+├── backend/server.js          # Node.js 内容后端：静态托管 + 公开 API + 管理 API
+├── backend/package.json       # npm start，无第三方依赖
 ├── backend/blog.db            # SQLite（不提交）
 ├── backend/admin_token.txt    # 管理口令（不提交）
-├── data/site.json             # 站点信息种子 / 静态兜底
+├── data/site.json             # 站点信息与 profile 种子 / 静态兜底
 ├── data/projects.json         # 项目种子 / 静态兜底
 ├── data/posts.json            # 文章索引种子 / 静态兜底
 ├── data/config.json           # chatApi / contentApi / modelName / repo / author
@@ -73,10 +73,11 @@ blog/                          # 仓库根目录（Pages 根目录）
 
 ### 1. 内容后端（推荐，同时托管页面）
 
+要求 Node.js 24+，无需安装第三方依赖：
+
 ```powershell
 cd 10.27\blog\backend
-python -m pip install -r requirements.txt
-python app.py
+node server.js
 ```
 
 访问 http://127.0.0.1:8100/ ，管理页 http://127.0.0.1:8100/admin.html 。首次启动会创建 `blog.db` 并从 `data/`、`posts/` 播种，同时生成 `admin_token.txt`。
@@ -129,8 +130,8 @@ curl http://127.0.0.1:8100/api/posts
 5. **`chatApi` 与 `contentApi` 只放在 `data/config.json`**，禁止在 JS/HTML 中写死隧道地址；
 6. **管理口令只存在后端 `admin_token.txt` 或环境变量**，禁止写入前端、文档、提交记录；
 7. **`admin.html` 不加入导航，保持 `noindex,nofollow`**；
-8. **管理接口必须携带 `X-Admin-Token`**，新增写接口必须复用 `require_admin`；
-9. **不出现姓名、学校、学号等身份标识**，站点以「模型手记 / 项目」为叙事；
+8. **管理接口必须携带 `X-Admin-Token`**，新增写接口必须复用 `requireAdmin()`；
+9. **默认不出现真实姓名、学校、学号等身份标识**；个人信息卡片由维护者在管理页自行决定是否填写；
 10. **不提交模型权重（`.pth`）、虚拟环境（`.venv`）、`cloudflared.exe`、`blog.db`、`admin_token.txt`、日志与缓存**；
 11. **不修改 `10.21` 的训练代码与权重**，推理服务只读引用；
 12. **修改 `js/chat.js` 后必须提升 `chat.html` 中的版本号**（如 `?v=2` → `?v=3`），避免 Pages 缓存旧脚本；
@@ -163,11 +164,12 @@ curl http://127.0.0.1:8100/api/posts
 
 ### 后端
 
-- `backend/app.py` 单文件；新增接口必须区分公开与管理两类；
-- 管理写接口统一加 `@require_admin`，错误返回 JSON 与明确状态码；
-- SQLite 连接使用 `with db() as conn`，查询参数化，不拼接 SQL；
-- 写库后必须 `commit()`，读接口只返回必要字段；
-- 种子只在表为空时执行，不能让重启覆盖管理页修改。
+- `backend/server.js` 单文件，只使用 Node.js 内置模块，不新增 npm 依赖；
+- 新增接口必须区分公开与管理两类，管理写接口复用 `requireAdmin()`；
+- SQLite 使用 `node:sqlite` 的 `prepare` 参数化查询，不拼接 SQL；
+- 静态文件路径必须经过 `path.resolve` 校验，并屏蔽 `backend/`、`node_modules/` 与点开头路径；
+- 站点信息保存采用合并策略，不能因为保存站点表单而清空 `profile`；
+- 种子只在表为空时执行；已有数据库只补齐缺失字段，不覆盖管理页修改。
 
 ### 内容
 
@@ -196,6 +198,14 @@ curl http://127.0.0.1:8100/api/posts
    - 详情能渲染代码块与链接；
 4. 提交：`feat: 新增 <标题> 文章`。
 
+### 修改个人信息
+
+1. 打开 `/admin.html`，输入 `admin_token.txt` 中的口令；
+2. 在「个人信息」卡片填写昵称、身份、简介、所在地、技能、邮箱与头像地址；
+3. 点击「保存个人信息」，接口为 `PUT /api/admin/profile`；
+4. 刷新 `about.html`，确认卡片文字、头像与技能显示正确；
+5. 清空昵称、身份与简介后，卡片会自动隐藏。
+
 ### 修改配色或排版
 
 1. 只改 `css/style.css` 的 `:root` 与对应组件；
@@ -213,7 +223,7 @@ curl http://127.0.0.1:8100/api/posts
 
 ### 更换内容服务地址
 
-1. 启动 `blog/backend/app.py`；
+1. 启动 `blog/backend/server.js`；
 2. 为 `127.0.0.1:8100` 启动 cloudflared；
 3. 只修改 `data/config.json` 的 `contentApi`；
 4. 刷新首页与项目页，确认数据来自内容 API；关闭后端再刷新，确认回退静态数据；
@@ -252,14 +262,15 @@ git push origin main
 1. 首页「最新记录」显示 3 篇，点击可进入详情；
 2. 文章列表搜索「部署」有结果，标签「SFT」可筛选；
 3. 随机打开 2 篇文章，标题、列表、代码块、链接正常；
-4. 项目页 5 张卡片、关于页站点信息来自 `/api/*`；
-5. 管理页错误口令提示失败，正确口令可修改站点、项目与文章；
-6. 关闭内容后端后刷新，前台自动回退静态数据；
-7. 对话页显示「模型在线」，发送「你好」能在 40 秒内收到回复；
-8. 关闭模型后端后刷新对话页，显示「模型服务离线」，文章仍可读；
-9. 500px 宽度下无横向滚动，汉堡菜单可展开；
-10. 浏览器控制台无报错；
-11. 页面中无姓名、学校、学号等身份信息。
+4. 项目页 5 张卡片、关于页站点信息与个人信息卡片来自 `/api/*`；
+5. 管理页错误口令提示失败，正确口令可修改站点、个人信息、项目与文章；
+6. 保存站点信息后，个人信息仍然保留；
+7. 关闭内容后端后刷新，前台自动回退静态数据；
+8. 对话页显示「模型在线」，发送「你好」能在 40 秒内收到回复；
+9. 关闭模型后端后刷新对话页，显示「模型服务离线」，文章仍可读；
+10. 500px 宽度下无横向滚动，汉堡菜单可展开；
+11. 浏览器控制台无报错；
+12. 默认页面中无真实姓名、学校、学号等身份信息。
 
 ## 八、提交规范
 
@@ -277,7 +288,10 @@ git push origin main
 | 对话请求 CORS 失败 | 响应头是否有 `Access-Control-Allow-Origin: *` |
 | 首页文章空白 | `http://127.0.0.1:8100/api/posts` → `data/config.json` 的 `contentApi` → `data/posts.json` 是否可访问 |
 | 管理页一直提示口令错误 | `backend/admin_token.txt` 内容 → `BLOG_ADMIN_TOKEN` 是否覆盖 → 请求头是否带 `X-Admin-Token` |
+| 内容后端启动失败 | `node -v` 是否 ≥ 24 → `node --check backend/server.js` → 端口 8100 是否被占用 |
 | 管理页数据为空 | 内容后端是否启动 → `blog.db` 是否已播种 → 浏览器网络面板看 `/api/*` 状态码 |
+| 个人信息卡片不显示 | `/api/site` 的 `profile` 是否有昵称/身份/简介 → 刷新 `/about.html` → 控制台 |
+| 静态文件 404 | `/backend/` 下文件被有意屏蔽；业务文件应放在 `blog/` 根目录 |
 | 内容接口 404 | 路径是否以 `/api/` 开头 → 文章 id 是否正确 → 后端是否重启加载新代码 |
 | 文章 404 | `id` 与文件名是否一致、大小写是否正确 |
 | 代码块显示错乱 | Markdown 围栏是否成对、语言标记后是否换行 |

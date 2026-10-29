@@ -2,9 +2,9 @@
 
 | 项目 | 内容 |
 | --- | --- |
-| 文档版本 | v1.2 |
+| 文档版本 | v1.3 |
 | 编写日期 | 2026-10-29 |
-| 对应版本 | 线上 v1.2（2026-10-29） |
+| 对应版本 | 线上 v1.3（2026-10-29） |
 | 线上地址 | https://yuchengwen393.github.io/model-notes/ |
 | 代码仓库 | https://github.com/yuchengwen393/model-notes |
 
@@ -36,7 +36,7 @@
 │ 内容链路                   │   │ 模型链路                       │
 │ Cloudflare Tunnel         │   │ Cloudflare Tunnel             │
 │ 127.0.0.1:8100            │   │ 127.0.0.1:5050                │
-│ Flask + SQLite            │   │ Flask + PyTorch CPU           │
+│ Node.js + node:sqlite     │   │ Flask + PyTorch CPU           │
 │ 静态页面 + /api/*         │   │ MiniMind-768 SFT              │
 └───────────┬───────────────┘   └───────────────────────────────┘
             │ 首次启动播种
@@ -54,7 +54,7 @@
 └─────────────────────────────────────────────────────────────┘
 ```
 
-**关键取舍**：GitHub Pages 只托管静态文件，无法运行 Python。v1.2 把内容维护与模型推理分别放在两个本机 Flask 服务中，通过 Cloudflare 隧道暴露 HTTPS 地址。三条链路互相独立：
+**关键取舍**：GitHub Pages 只托管静态文件，无法运行 Python 或 Node。v1.3 把内容维护与模型推理分别放在两个本机服务中：内容服务用 Node.js，模型服务用 Flask，通过 Cloudflare 隧道暴露 HTTPS 地址。三条链路互相独立：
 
 1. **页面链路**：GitHub Pages 永久可访问；
 2. **内容链路**：内容 API 在线时页面数据来自 SQLite，管理页可读写；离线时自动回退静态 JSON / Markdown；
@@ -68,7 +68,7 @@
 | 样式 | 原生 CSS + CSS 变量 | 设计令牌集中，换色只改 `:root` |
 | 文章 | Markdown + 自写渲染器 | 内容与页面分离，不引入 marked 等库 |
 | 数据 | JSON（静态兜底）+ SQLite（内容后端） | 静态可缓存；后端可在线维护 |
-| 内容服务 | Python 3 + Flask 3 + SQLite | 与模型服务同技术栈，单文件可运行 |
+| 内容服务 | Node.js 24+ + 内置 `node:sqlite` | 零第三方依赖，单文件可运行，与静态页面同源 |
 | 内容管理 | 原生 JS + 管理口令 | 不引入账号体系，满足课程后台要求 |
 | 推理服务 | Python 3.14 + Flask 3.1 | 轻量、易调试，适合本机单模型 |
 | 模型运行时 | PyTorch 2.14.1+cpu + Transformers 5.21 | 与 10.21 训练代码一致，CPU 可跑 |
@@ -96,13 +96,13 @@
 │   │   ├── posts.js               # 归档搜索与标签筛选
 │   │   ├── post.js                # 详情加载、进度、相关阅读
 │   │   ├── projects.js            # 项目卡片动态渲染
-│   │   ├── about.js               # 关于页站点信息
-│   │   ├── admin.js               # 管理页：口令、站点、项目、文章
+│   │   ├── about.js               # 关于页站点信息与个人信息卡片
+│   │   ├── admin.js               # 管理页：口令、站点、个人信息、项目、文章
 │   │   ├── markdown.js            # 轻量 Markdown 渲染
 │   │   └── chat.js                # 对话状态机与请求
 │   ├── backend/
-│   │   ├── app.py                 # 内容后端：静态托管 + 公开 API + 管理 API
-│   │   ├── requirements.txt       # Flask
+│   │   ├── server.js              # Node.js 内容后端：静态托管 + 公开 API + 管理 API
+│   │   ├── package.json           # npm start 脚本，无第三方依赖
 │   │   ├── blog.db                # SQLite（不提交）
 │   │   └── admin_token.txt        # 管理口令（不提交）
 │   ├── data/
@@ -145,6 +145,7 @@
 
 - 首页 / 列表 / 项目 / 关于 / 详情统一通过 `js/blog-api.js` 读取内容；
 - `BlogAPI` 先读 `data/config.json` 的 `contentApi`，再请求 `/api/site`、`/api/projects`、`/api/posts`、`/api/posts/<id>`；
+- 本地通过 `127.0.0.1` / `localhost` 访问时直接使用同源 API，避免隧道离线导致后台不可用；
 - 内容 API 请求失败（断网、后端未启动、隧道失效）时自动回退 `data/site.json`、`data/projects.json`、`data/posts.json` 与 `posts/<id>.md`；
 - 请求失败时展示可读的错误文案，不抛出未捕获异常；
 - 文章索引只含元数据（标题、摘要、标签、阅读时长），正文按需加载；
@@ -309,38 +310,47 @@ CPU 推理实测约 **27–32 tokens/s**；60–180 tokens 的回答通常 2–7
 | 生成异常 | 显示「生成失败」 | 500 |
 | 并发请求 | 后到的请求排队 | `Lock` 串行 |
 
-### 6.7 内容后端设计
+### 6.7 内容后端设计（Node.js）
 
-内容后端位于 `blog/backend/app.py`，单文件实现，负责三件事：
+内容后端位于 `blog/backend/server.js`，单文件实现，仅使用 Node.js 内置模块：
+
+- `node:http` 提供 HTTP 服务；
+- `node:sqlite` 读写 SQLite；
+- `node:fs` / `node:path` 托管静态文件；
+- `node:crypto` 生成并校验管理口令。
+
+职责有三件：
 
 1. 托管 `blog/` 下的静态页面；
-2. 提供站点、项目、文章的公开读取 API；
+2. 提供站点、个人信息、项目、文章的公开读取 API；
 3. 提供带管理口令的内容管理 API。
 
 #### 启动与播种
 
 ```text
-读取环境变量 PORT（默认 8100）与 BLOG_ADMIN_TOKEN
-  → 创建 / 打开 blog/backend/blog.db
+读取环境变量 HOST（默认 127.0.0.1）、PORT（默认 8100）与 BLOG_ADMIN_TOKEN
+  → 打开 blog/backend/blog.db，启用 WAL
   → 建表 site / projects / posts（IF NOT EXISTS）
   → 若表为空，读取 data/site.json、data/projects.json、data/posts.json 与 posts/*.md 播种
+  → 若数据库已有 site，则只补齐缺失字段（如 profile），不覆盖管理页修改
   → 读取或生成管理口令（admin_token.txt）
-  → Flask 以 static_folder=blog/ 托管静态文件
   → 监听 127.0.0.1:8100
 ```
 
-播种只在表为空时执行，管理页修改后不会被种子覆盖；删除 `blog.db` 可恢复为文件版本。
+播种只在表为空时执行；删除 `blog.db` 可恢复为文件版本。
 
 #### 静态托管
 
-- `Flask(static_folder=BLOG_DIR, static_url_path="")`，`/` 显式返回 `index.html`；
-- 静态路由与 `/api/*` 不冲突，API 优先匹配；
-- 未知 `/api/*` 返回 JSON 404，其余路径按静态文件处理。
+- 静态根目录为 `blog/`，`/` 映射到 `index.html`；
+- 路径经 `decodeURIComponent` 与 `path.resolve` 后必须仍位于 `blog/` 内，防止路径穿越；
+- 显式屏蔽 `backend/`、`node_modules/` 与所有点开头路径，避免 `admin_token.txt`、`blog.db` 被下载；
+- 按扩展名返回 Content-Type，HTML 使用 `no-cache`，其余静态资源缓存 60 秒；
+- 未知 `/api/*` 返回 JSON 404，其余未知路径返回 404 页面。
 
 #### 管理认证
 
 - 口令来源优先级：环境变量 `BLOG_ADMIN_TOKEN` > `backend/admin_token.txt` > 首次启动随机生成；
-- 请求头 `X-Admin-Token` 与口令做 `secrets.compare_digest`；
+- 请求头 `X-Admin-Token` 与口令使用 `crypto.timingSafeEqual` 做定长比较；
 - 缺失或不匹配返回 `401 {"error": "管理口令不正确。"}`；
 - 口令文件与数据库已加入 `.gitignore`，不进入仓库。
 
@@ -348,8 +358,8 @@ CPU 推理实测约 **27–32 tokens/s**；60–180 tokens 的回答通常 2–7
 
 | 方法 | 路径 | 返回 |
 | --- | --- | --- |
-| GET | `/api/health` | `{status, service, database}` |
-| GET | `/api/site` | 站点信息对象 |
+| GET | `/api/health` | `{status, service, runtime, database}` |
+| GET | `/api/site` | 站点信息对象，含 `profile` 个人信息 |
 | GET | `/api/projects` | `{projects: [...]}`，按 `sort_order` 升序 |
 | GET | `/api/posts` | `{site, posts: [...]}`，按 `sort_order` 升序 |
 | GET | `/api/posts/<id>` | `{post, content}`；不存在 404 |
@@ -359,7 +369,8 @@ CPU 推理实测约 **27–32 tokens/s**；60–180 tokens 的回答通常 2–7
 | 方法 | 路径 | 说明 |
 | --- | --- | --- |
 | GET | `/api/admin/session` | 验证口令，返回 `{ok: true}` |
-| PUT | `/api/admin/site` | 整体保存站点信息，body 必须是 JSON 对象 |
+| PUT | `/api/admin/site` | 合并保存站点信息，未提交字段与 `profile` 保持不变 |
+| PUT | `/api/admin/profile` | 只合并保存个人信息，不影响站点其他字段 |
 | POST | `/api/admin/projects` | 新增项目，`id` 与 `title` 必填，`id` 冲突 409 |
 | PUT | `/api/admin/projects/<id>` | 更新项目，不存在 404 |
 | DELETE | `/api/admin/projects/<id>` | 删除项目，幂等 |
@@ -367,13 +378,13 @@ CPU 推理实测约 **27–32 tokens/s**；60–180 tokens 的回答通常 2–7
 | PUT | `/api/admin/posts/<id>` | 更新文章，未传 `content` 时保留原正文 |
 | DELETE | `/api/admin/posts/<id>` | 删除文章，幂等 |
 
-新增文章时 `sort_order` 取当前最小值减一，因此默认排在最前；新增项目取最大值加一，默认排在最后。
+新增文章时 `sort_order` 取当前最小值减一，因此默认排在最前；新增项目取最大值加一，默认排在最后。资源 `id` 只允许字母、数字、点、下划线与短横线，避免路径注入。
 
 #### 跨域与错误处理
 
 - 响应头允许 `GET / POST / PUT / DELETE / OPTIONS`，允许 `Content-Type` 与 `X-Admin-Token`；
 - `OPTIONS` 统一返回 204；
-- 请求体不是 JSON 对象返回 400；
+- 请求体不是 JSON 对象返回 400，超过 2MB 返回 413；
 - 管理口令错误返回 401，资源不存在返回 404，`id` 冲突返回 409；
 - 前端管理页对 401 / 404 / 409 / 网络错误分别给出可读提示。
 
@@ -407,22 +418,43 @@ CPU 推理实测约 **27–32 tokens/s**；60–180 tokens 的回答通常 2–7
 
 ### 7.2 `data/site.json` 与 `data/projects.json`
 
-`site.json` 是一个扁平对象，管理页按字段整体读写：
+`site.json` 保存站点字段与个人信息，管理页通过站点表单与个人信息表单分别读写：
 
 ```json
 {
   "title": "模型手记",
   "tagline": "把训练、部署与踩坑写在一起。",
-  "intro": "……",
+  "intro": ["第一段", "第二段"],
   "type": "个人项目 / 课程实践",
   "theme": "模型训练与部署记录",
   "time": "2026.10",
-  "tech": "HTML / CSS / JavaScript / Python",
+  "tech": "HTML / CSS / JavaScript · Node.js · PyTorch",
   "model": "MiniMind-768 SFT",
   "domain": "yuchengwen393.github.io/model-notes",
-  "repo": "https://github.com/yuchengwen393/model-notes"
+  "repo": "https://github.com/yuchengwen393/model-notes",
+  "profile": {
+    "nickname": "模型手记",
+    "role": "独立开发者 · 课程实践",
+    "email": "",
+    "location": "",
+    "avatar": "favicon.svg",
+    "skills": "PyTorch / Transformers / JavaScript / Node.js",
+    "bio": "把训练过的模型，放到能用的地方。"
+  }
 }
 ```
+
+`profile` 字段说明：
+
+| 字段 | 用途 |
+| --- | --- |
+| `nickname` | 关于页个人信息卡片的昵称 |
+| `role` | 身份 / 研究方向 |
+| `email` | 可选邮箱，填写后渲染为 `mailto:` 链接 |
+| `location` | 可选所在地 |
+| `avatar` | 头像地址，默认 `favicon.svg` |
+| `skills` | 技能概览文本 |
+| `bio` | 一句话个人简介 |
 
 `projects.json` 的结构：
 
@@ -511,14 +543,16 @@ type Message = { role: "user" | "assistant"; content: string };
 4. 推送后 1–2 分钟自动构建；
 5. 更新后若浏览器仍显示旧内容，等待 Pages 缓存过期或强制刷新。
 
-### 8.2 内容后端
+### 8.2 内容后端（Node.js）
 
 ```powershell
 cd 10.27\blog\backend
-python -m pip install -r requirements.txt
-python app.py
+node server.js
+# 或
+npm start
 ```
 
+- 要求 Node.js 24+，无第三方依赖，不需要 `npm install`；
 - 默认监听 `127.0.0.1:8100`，同时托管页面与 `/api/*`；
 - 首次启动生成 `admin_token.txt`，管理页需要输入该口令；
 - 数据库文件 `blog.db` 首次启动自动建表并从 `data/` 与 `posts/` 播种；
@@ -600,18 +634,27 @@ curl http://127.0.0.1:8100/api/posts/10-27-this-blog
 # 管理接口：先读取口令
 $token = Get-Content .\admin_token.txt -Raw
 curl -H "X-Admin-Token: $token" http://127.0.0.1:8100/api/admin/session
+
+# 个人信息保存后重新读取 /api/site
+curl -X PUT http://127.0.0.1:8100/api/admin/profile `
+  -H "Content-Type: application/json" `
+  -H "X-Admin-Token: $token" `
+  -d "{\"nickname\":\"模型手记\"}"
+
+# 敏感文件必须返回 404
+curl -o NUL -w "%{http_code}" http://127.0.0.1:8100/backend/admin_token.txt
 ```
 
-覆盖：公开接口 200、未知文章 404、错误口令 401、正确口令可读写。
+覆盖：公开接口 200、未知文章 404、错误口令 401、正确口令可读写、个人信息保存、静态目录不可下载。
 
 ### 10.4 页面验收
 
 1. 首页 3 篇最新文章；
 2. 列表搜索「部署」、标签「SFT」；
 3. 随机打开 3 篇文章，检查代码块与链接；
-4. 项目页 5 张卡片、关于页站点信息来自 API；
+4. 项目页 5 张卡片、关于页站点信息与个人信息卡片来自 API；
 5. 关闭内容后端后刷新页面，文章与项目仍能从静态数据加载；
-6. 管理页登录后修改并保存站点 / 项目 / 文章；
+6. 管理页登录后修改并保存站点、个人信息、项目与文章；
 7. 对话页在线状态、一轮问答、清空对话；
 8. 关闭模型服务后对话页显示离线，文章仍可读；
 9. 375px 宽度无横向滚动；

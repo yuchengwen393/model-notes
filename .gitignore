@@ -2,5 +2,7 @@
 Thumbs.db
 *.log
 backend/blog.db
+backend/blog.db-wal
+backend/blog.db-shm
 backend/admin_token.txt
 backend/__pycache__/

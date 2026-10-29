@@ -1,11 +1,14 @@
-/* 模型手记内容管理：调用 Flask 内容 API，口令保存在 sessionStorage。 */
+/* 模型手记内容管理：调用 Node.js 内容 API，口令保存在 sessionStorage。 */
 (function () {
   const tokenInput = document.getElementById("tokenInput");
   const tokenStatus = document.getElementById("tokenStatus");
   const siteCard = document.getElementById("siteCard");
+  const profileCard = document.getElementById("profileCard");
   const projectCard = document.getElementById("projectCard");
   const postCard = document.getElementById("postCard");
   const siteForm = document.getElementById("siteForm");
+  const profileForm = document.getElementById("profileForm");
+  const profileStatus = document.getElementById("profileStatus");
   const projectList = document.getElementById("projectList");
   const postSelect = document.getElementById("postSelect");
   const postForm = document.getElementById("postForm") || document.getElementById("postCard");
@@ -34,6 +37,10 @@
   }
 
   async function apiBase() {
+    // 本地直接访问时使用同源 API，隧道离线也能管理内容。
+    if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
+      return location.origin;
+    }
     try {
       const config = await fetch(`data/config.json?t=${Date.now()}`, { cache: "no-store" }).then((res) => res.json());
       return (config.contentApi || "").replace(/\/+$/, "") || location.origin;
@@ -59,6 +66,13 @@
       if (form[key]) form[key].value = site[key] || "";
     });
     if (form.intro) form.intro.value = Array.isArray(site.intro) ? site.intro.join("\n") : site.intro || "";
+  }
+
+  function fillProfile(profile) {
+    const form = profileForm.elements;
+    ["nickname", "role", "email", "location", "avatar", "skills", "bio"].forEach((key) => {
+      if (form[key]) form[key].value = profile[key] || "";
+    });
   }
 
   function projectBlock(project, isNew = false) {
@@ -176,6 +190,7 @@
       request("/api/posts"),
     ]);
     fillSite(site);
+    fillProfile(site.profile || {});
     renderProjects(projects.projects || []);
     postSelect.innerHTML = (posts.posts || [])
       .map((post) => `<option value="${esc(post.id)}">${esc(post.title)}</option>`)
@@ -198,7 +213,7 @@
     try {
       await request("/api/admin/session");
       status(tokenStatus, "口令正确，已解锁。");
-      [siteCard, projectCard, postCard].forEach((card) => (card.hidden = false));
+      [siteCard, profileCard, projectCard, postCard].forEach((card) => (card.hidden = false));
       await loadAll();
     } catch (error) {
       sessionStorage.removeItem("modelnotes_admin_token");
@@ -231,6 +246,21 @@
       status(document.getElementById("siteStatus"), "站点信息已保存。");
     } catch (error) {
       status(document.getElementById("siteStatus"), error.message, true);
+    }
+  });
+
+  profileForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const form = profileForm.elements;
+    const payload = {};
+    ["nickname", "role", "email", "location", "avatar", "skills", "bio"].forEach((key) => {
+      payload[key] = form[key].value.trim();
+    });
+    try {
+      await request("/api/admin/profile", { method: "PUT", body: JSON.stringify(payload) });
+      status(profileStatus, "个人信息已保存。");
+    } catch (error) {
+      status(profileStatus, error.message, true);
     }
   });
 

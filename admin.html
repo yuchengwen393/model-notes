@@ -48,7 +48,7 @@
     <div class="admin-head">
       <div class="eyebrow">Admin · 内容管理</div>
       <h1>站点内容后台</h1>
-      <p>站点信息、项目与文章写入 SQLite，由 Flask 内容 API 提供；管理口令只保存在本机浏览器会话中。</p>
+      <p>站点信息、个人信息、项目与文章写入 SQLite，由 Node.js 内容 API 提供；管理口令只保存在本机浏览器会话中。</p>
     </div>
 
     <section class="admin-card">
@@ -82,6 +82,25 @@
         <div class="admin-actions">
           <button class="admin-btn" type="submit">保存站点信息</button>
           <span class="admin-status" id="siteStatus"></span>
+        </div>
+      </form>
+    </section>
+
+    <section class="admin-card" id="profileCard" hidden>
+      <h2>个人信息</h2>
+      <form id="profileForm">
+        <div class="admin-grid">
+          <label class="admin-field">昵称<input name="nickname"></label>
+          <label class="admin-field">身份 / 方向<input name="role"></label>
+          <label class="admin-field">邮箱<input name="email" type="email"></label>
+          <label class="admin-field">所在地<input name="location"></label>
+          <label class="admin-field">头像地址<input name="avatar" placeholder="favicon.svg"></label>
+          <label class="admin-field">技能<input name="skills" placeholder="PyTorch / JavaScript"></label>
+          <label class="admin-field full">个人简介<textarea name="bio"></textarea></label>
+        </div>
+        <div class="admin-actions">
+          <button class="admin-btn" type="submit">保存个人信息</button>
+          <span class="admin-status" id="profileStatus"></span>
         </div>
       </form>
     </section>

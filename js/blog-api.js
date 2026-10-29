@@ -1,4 +1,4 @@
-/* 内容 API 客户端：优先读 Flask 后端，失败时回退到静态 JSON / Markdown。 */
+/* 内容 API 客户端：优先读 Node.js 后端，失败时回退到静态 JSON / Markdown。 */
 (function () {
   const CONFIG_URL = "data/config.json";
   let configPromise = null;
@@ -13,6 +13,10 @@
   }
 
   async function apiBase() {
+    // 本地直接访问时使用同源 API，避免隧道离线导致本地后台不可用。
+    if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
+      return location.origin;
+    }
     const config = await loadConfig();
     return (config.contentApi || "").replace(/\/+$/, "");
   }

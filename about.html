@@ -39,6 +39,16 @@
     </section>
 
     <section class="wrap">
+      <div class="profile-card reveal" id="profileCard" hidden>
+        <img class="profile-avatar" id="profileAvatar" src="favicon.svg" alt="站点头像">
+        <div class="profile-body">
+          <h2 id="profileName">模型手记</h2>
+          <p class="profile-role" id="profileRole"></p>
+          <p class="profile-bio" id="profileBio"></p>
+          <ul class="profile-meta" id="profileMeta"></ul>
+        </div>
+      </div>
+
       <div class="about-grid">
         <div class="monogram reveal">
           <span>M</span>
@@ -63,7 +73,7 @@
             <tr><th>类型</th><td data-site="type">个人技术博客 + 模型对话 Demo</td></tr>
             <tr><th>主题</th><td data-site="theme">语言模型训练 · 前端工程 · AI 工具</td></tr>
             <tr><th>时间</th><td data-site="time">2026 年 10 月</td></tr>
-            <tr><th>技术</th><td data-site="tech">HTML / CSS / JavaScript · Flask · PyTorch</td></tr>
+            <tr><th>技术</th><td data-site="tech">HTML / CSS / JavaScript · Node.js · PyTorch</td></tr>
             <tr><th>模型</th><td data-site="model">MiniMind-768 SFT · 6391 万参数</td></tr>
             <tr><th>域名</th><td data-site="domain">yuchengwen393.github.io/model-notes</td></tr>
           </table>
@@ -107,8 +117,8 @@
             包括 PRD、技术设计与 AGENTS 约定。
           </p>
           <p>
-            对话由本机 Flask 服务提供，模型只有 6391 万参数，回答可能不准确；
-            页面不收集用户数据，对话内容只发送到本地推理服务。
+            内容与个人信息由本机 Node.js 服务托管，对话由 Flask 推理服务提供；
+            模型只有 6391 万参数，回答可能不准确；页面不收集用户数据，对话内容只发送到本地推理服务。
           </p>
         </div>
       </div>
