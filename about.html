@@ -34,7 +34,7 @@
       <div class="wrap">
         <div class="eyebrow">About · 关于本项目</div>
         <h1>记录跑通的部分</h1>
-        <p>不记录「今天学了什么」，只记录哪些东西真正跑起来了、在哪里卡住、最后怎么解决。</p>
+        <p id="aboutTagline">不记录「今天学了什么」，只记录哪些东西真正跑起来了、在哪里卡住、最后怎么解决。</p>
       </div>
     </section>
 
@@ -47,23 +47,25 @@
 
         <div class="about-copy">
           <h2>这个站点是什么</h2>
-          <p>
-            「模型手记」是一个围绕语言模型实践建立的个人站点：
-            从分词器、Transformer、预训练与 SFT 一路记录到网页部署，
-            再把训练出的权重接进站内的对话页。
-          </p>
-          <p>
-            它更关心「能不能用」而不是「看起来多厉害」：插件要能下载，
-            官网要有域名，模型要能回答。做不好的地方就写下来，下一篇继续改。
-          </p>
+          <div id="aboutIntro">
+            <p>
+              「模型手记」是一个围绕语言模型实践建立的个人站点：
+              从分词器、Transformer、预训练与 SFT 一路记录到网页部署，
+              再把训练出的权重接进站内的对话页。
+            </p>
+            <p>
+              它更关心「能不能用」而不是「看起来多厉害」：插件要能下载，
+              官网要有域名，模型要能回答。做不好的地方就写下来，下一篇继续改。
+            </p>
+          </div>
 
           <table class="info-table">
-            <tr><th>类型</th><td>个人技术博客 + 模型对话 Demo</td></tr>
-            <tr><th>主题</th><td>语言模型训练 · 前端工程 · AI 工具</td></tr>
-            <tr><th>时间</th><td>2026 年 10 月</td></tr>
-            <tr><th>技术</th><td>HTML / CSS / JavaScript · Flask · PyTorch</td></tr>
-            <tr><th>模型</th><td>MiniMind-768 SFT · 6391 万参数</td></tr>
-            <tr><th>域名</th><td>yuchengwen393.github.io/model-notes</td></tr>
+            <tr><th>类型</th><td data-site="type">个人技术博客 + 模型对话 Demo</td></tr>
+            <tr><th>主题</th><td data-site="theme">语言模型训练 · 前端工程 · AI 工具</td></tr>
+            <tr><th>时间</th><td data-site="time">2026 年 10 月</td></tr>
+            <tr><th>技术</th><td data-site="tech">HTML / CSS / JavaScript · Flask · PyTorch</td></tr>
+            <tr><th>模型</th><td data-site="model">MiniMind-768 SFT · 6391 万参数</td></tr>
+            <tr><th>域名</th><td data-site="domain">yuchengwen393.github.io/model-notes</td></tr>
           </table>
 
           <div class="skill-groups">
@@ -131,6 +133,8 @@
     </div>
   </footer>
 
+  <script src="js/blog-api.js"></script>
+  <script src="js/about.js"></script>
   <script src="js/site.js"></script>
 </body>
 </html>

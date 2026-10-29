@@ -2,8 +2,7 @@
   const container = document.getElementById("latestPosts");
   if (!container) return;
 
-  fetch("data/posts.json")
-    .then((res) => res.json())
+  window.BlogAPI.getPosts()
     .then((data) => {
       const posts = data.posts.slice(0, 3);
       container.innerHTML = posts

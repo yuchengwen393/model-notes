@@ -1,0 +1,59 @@
+{
+  "projects": [
+    {
+      "id": "imagegrab",
+      "no": "01",
+      "category": "CHROME EXTENSION",
+      "status": "已上线",
+      "title": "ImageGrab 图片提取插件",
+      "summary": "Manifest V3 电商图片提取插件：识别详情页、扫描懒加载属性、过滤 Logo 与占位图，新标签页集中预览，单张下载 PNG，多张打包 ZIP。纯前端处理，不上传图片。",
+      "tags": ["JavaScript", "MV3", "Canvas", "ZIP"],
+      "link": "https://yuchengwen393.github.io/imagegrab/",
+      "linkLabel": "打开站点"
+    },
+    {
+      "id": "minimind",
+      "no": "02",
+      "category": "MODEL",
+      "status": "已训练",
+      "title": "MiniMind-768 预训练与 SFT",
+      "summary": "8 层、768 维、6391 万参数的语言模型。1.24GB 语料预训练 19,848 步，SFT 14,152 步；权重用于本站对话页，CPU 推理约 30 tokens/s。",
+      "tags": ["PyTorch", "Transformer", "SFT", "LoRA"],
+      "link": "https://github.com/yuchengwen393",
+      "linkLabel": "GitHub 主页"
+    },
+    {
+      "id": "model-notes",
+      "no": "03",
+      "category": "SITE",
+      "status": "本站",
+      "title": "模型手记 + 对话",
+      "summary": "无框架静态博客：首页、归档、文章、项目、关于与对话六个页面。文章用 Markdown 维护，对话页调用 Flask 推理接口，加载本地 SFT 权重。",
+      "tags": ["HTML / CSS", "Flask", "GitHub Pages"],
+      "link": "chat.html",
+      "linkLabel": "打开对话页"
+    },
+    {
+      "id": "watermark",
+      "no": "04",
+      "category": "TOOL",
+      "status": "公网演示",
+      "title": "图片水印助手",
+      "summary": "单文件网页工具：批量上传，文字 / 图片两种水印，九宫格位置与平铺，透明度与边距可调，实时预览并批量下载。",
+      "tags": ["Canvas", "File API", "零代码"],
+      "link": "https://rapid-lips-houses-among.trycloudflare.com/项目1-图片水印助手/index.html?demo=1",
+      "linkLabel": "打开演示"
+    },
+    {
+      "id": "translator",
+      "no": "05",
+      "category": "TOOL",
+      "status": "公网演示",
+      "title": "AI 翻译助手",
+      "summary": "中英互译、一键复制、学习建议与本地历史记录。演示版用本地 SVG 插画，避免外部图片服务的额度限制。",
+      "tags": ["JavaScript", "API", "localStorage"],
+      "link": "https://rapid-lips-houses-among.trycloudflare.com/项目2-AI翻译助手/index.html?demo=1&fresh=1",
+      "linkLabel": "打开演示"
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>内容管理 · 模型手记</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .admin-wrap { width: min(1080px, calc(100% - 40px)); margin: 40px auto 80px; }
+    .admin-head { margin-bottom: 24px; }
+    .admin-head h1 { font-size: 30px; margin: 8px 0; }
+    .admin-card { background: #fffdf8; border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px; margin-bottom: 18px; }
+    .admin-card h2 { font-size: 18px; margin: 0 0 14px; }
+    .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; }
+    .admin-field { display: flex; flex-direction: column; gap: 5px; font-size: 12px; color: var(--muted); }
+    .admin-field.full { grid-column: 1 / -1; }
+    .admin-field input, .admin-field textarea, .admin-field select {
+      width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px;
+      font: inherit; color: var(--ink); background: #fffefb;
+    }
+    .admin-field textarea { min-height: 76px; resize: vertical; line-height: 1.6; }
+    .admin-field textarea.content { min-height: 220px; font-family: var(--mono); font-size: 12px; }
+    .admin-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; align-items: center; }
+    .admin-btn { border: 1px solid var(--ink); background: var(--ink); color: #fffdf8; border-radius: 8px; padding: 8px 13px; font: inherit; font-size: 12px; cursor: pointer; }
+    .admin-btn.ghost { background: transparent; color: var(--ink); }
+    .admin-btn.danger { background: #a83a24; border-color: #a83a24; }
+    .admin-status { font-size: 12px; color: var(--muted); margin-left: 6px; }
+    .admin-project { border-top: 1px dashed var(--line); padding-top: 14px; margin-top: 14px; }
+    .admin-project:first-of-type { border-top: 0; padding-top: 0; margin-top: 0; }
+    .admin-code { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+    @media (max-width: 760px) { .admin-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body data-page="admin">
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">M</span>
+        <span class="brand-text">模型手记<small>Content&nbsp;Admin</small></span>
+      </a>
+      <a class="nav-cta" href="index.html">返回站点</a>
+    </div>
+  </header>
+
+  <main class="admin-wrap">
+    <div class="admin-head">
+      <div class="eyebrow">Admin · 内容管理</div>
+      <h1>站点内容后台</h1>
+      <p>站点信息、项目与文章写入 SQLite，由 Flask 内容 API 提供；管理口令只保存在本机浏览器会话中。</p>
+    </div>
+
+    <section class="admin-card">
+      <h2>管理口令</h2>
+      <div class="admin-grid">
+        <label class="admin-field full">口令
+          <input id="tokenInput" type="password" autocomplete="current-password" placeholder="输入 backend/admin_token.txt 中的口令">
+        </label>
+      </div>
+      <div class="admin-actions">
+        <button class="admin-btn" id="saveToken" type="button">验证并保存</button>
+        <span class="admin-status" id="tokenStatus">未验证</span>
+      </div>
+    </section>
+
+    <section class="admin-card" id="siteCard" hidden>
+      <h2>站点信息</h2>
+      <form id="siteForm">
+        <div class="admin-grid">
+          <label class="admin-field">标题<input name="title"></label>
+          <label class="admin-field">一句话主张<input name="tagline"></label>
+          <label class="admin-field full">介绍段落（每行一段）<textarea name="intro"></textarea></label>
+          <label class="admin-field">类型<input name="type"></label>
+          <label class="admin-field">主题<input name="theme"></label>
+          <label class="admin-field">时间<input name="time"></label>
+          <label class="admin-field">技术<input name="tech"></label>
+          <label class="admin-field">模型<input name="model"></label>
+          <label class="admin-field">域名<input name="domain"></label>
+          <label class="admin-field">仓库<input name="repo"></label>
+        </div>
+        <div class="admin-actions">
+          <button class="admin-btn" type="submit">保存站点信息</button>
+          <span class="admin-status" id="siteStatus"></span>
+        </div>
+      </form>
+    </section>
+
+    <section class="admin-card" id="projectCard" hidden>
+      <h2>项目</h2>
+      <p class="admin-code">项目按顺序显示；修改后点“保存项目”。</p>
+      <div id="projectList"></div>
+      <div class="admin-actions">
+        <button class="admin-btn ghost" id="addProject" type="button">新增项目</button>
+        <span class="admin-status" id="projectStatus"></span>
+      </div>
+    </section>
+
+    <section class="admin-card" id="postCard" hidden>
+      <h2>文章</h2>
+      <div class="admin-grid">
+        <label class="admin-field">选择文章<select id="postSelect"></select></label>
+        <label class="admin-field">文章 ID（新建后不可改）<input name="id" id="postId"></label>
+        <label class="admin-field">标题<input name="title" id="postTitle"></label>
+        <label class="admin-field">副标题<input name="subtitle" id="postSubtitle"></label>
+        <label class="admin-field">日期<input name="date" id="postDate" placeholder="2026-10-29"></label>
+        <label class="admin-field">标签（逗号分隔）<input name="tags" id="postTags"></label>
+        <label class="admin-field">摘要<textarea name="summary" id="postSummary"></textarea></label>
+        <label class="admin-field">阅读时长<input name="readingTime" id="postReadingTime" placeholder="6 min"></label>
+        <label class="admin-field full">正文 Markdown<textarea class="content" name="content" id="postContent"></textarea></label>
+      </div>
+      <div class="admin-actions">
+        <button class="admin-btn" id="savePost" type="button">保存文章</button>
+        <button class="admin-btn ghost" id="newPost" type="button">新建文章</button>
+        <button class="admin-btn danger" id="deletePost" type="button">删除当前文章</button>
+        <span class="admin-status" id="postStatus"></span>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/admin.js"></script>
+</body>
+</html>

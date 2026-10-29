@@ -1,0 +1,15 @@
+{
+  "title": "模型手记",
+  "tagline": "把训练过的模型，放到能用的地方。",
+  "intro": [
+    "「模型手记」是一个围绕语言模型实践建立的个人站点：从分词器、Transformer、预训练与 SFT 一路记录到网页部署，再把训练出的权重接进站内的对话页。",
+    "它更关心「能不能用」而不是「看起来多厉害」：插件要能下载，官网要有域名，模型要能回答。做不好的地方就写下来，下一篇继续改。"
+  ],
+  "type": "个人技术博客 + 模型对话 Demo",
+  "theme": "语言模型训练 · 前端工程 · AI 工具",
+  "time": "2026 年 10 月",
+  "tech": "HTML / CSS / JavaScript · Flask · PyTorch",
+  "model": "MiniMind-768 SFT · 6391 万参数",
+  "domain": "yuchengwen393.github.io/model-notes",
+  "repo": "https://github.com/yuchengwen393/model-notes"
+}

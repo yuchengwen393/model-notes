@@ -2,9 +2,9 @@
 
 | 项目 | 内容 |
 | --- | --- |
-| 文档版本 | v1.1 |
-| 编写日期 | 2026-10-28 |
-| 对应版本 | 线上 v1.0（2026-10-28） |
+| 文档版本 | v1.2 |
+| 编写日期 | 2026-10-29 |
+| 对应版本 | 线上 v1.2（2026-10-29） |
 | 线上地址 | https://yuchengwen393.github.io/model-notes/ |
 | 代码仓库 | https://github.com/yuchengwen393/model-notes |
 
@@ -16,39 +16,49 @@
 2. 让课程中训练出的 MiniMind-768 SFT 权重真实参与页面交互；
 3. 静态站与推理服务解耦：模型离线不影响文章阅读；
 4. 不引入前端框架与构建工具，降低维护成本；
-5. 隧道地址、文章内容、页面样式都能独立替换。
+5. 隧道地址、文章内容、页面样式都能独立替换；
+6. 增加内容后端，让站点信息、项目与文章可以在管理页在线维护，同时保留静态兜底。
 
 ## 二、总体架构
 
 ```text
-┌─────────────────────────────────────────────────────┐
-│ 浏览器                                               │
-│  HTML / CSS / 原生 JavaScript                       │
-│  ├── data/posts.json        文章索引（fetch）        │
-│  ├── posts/<id>.md          文章正文（按需 fetch）   │
-│  └── data/config.json       接口地址（no-store）     │
-└───────────────────────┬─────────────────────────────┘
-                        │ HTTPS
-                        ▼
-┌─────────────────────────────────────────────────────┐
-│ GitHub Pages                                        │
-│  repo: yuchengwen393/model-notes                    │
-│  branch: main / root / .nojekyll                    │
-└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│ 浏览器                                                       │
+│  HTML / CSS / 原生 JavaScript                               │
+│  ├── data/config.json        chatApi / contentApi（no-store）│
+│  ├── js/blog-api.js          API 优先、静态兜底              │
+│  ├── js/chat.js              模型对话状态机                  │
+│  └── js/admin.js             内容管理（X-Admin-Token）        │
+└───────────┬──────────────────────────────┬──────────────────┘
+            │ HTTPS                        │ HTTPS
+            ▼                              ▼
+┌───────────────────────────┐   ┌───────────────────────────────┐
+│ 内容链路                   │   │ 模型链路                       │
+│ Cloudflare Tunnel         │   │ Cloudflare Tunnel             │
+│ 127.0.0.1:8100            │   │ 127.0.0.1:5050                │
+│ Flask + SQLite            │   │ Flask + PyTorch CPU           │
+│ 静态页面 + /api/*         │   │ MiniMind-768 SFT              │
+└───────────┬───────────────┘   └───────────────────────────────┘
+            │ 首次启动播种
+            ▼
+┌───────────────────────────┐
+│ data/site.json            │
+│ data/projects.json        │
+│ data/posts.json + posts/  │
+└───────────────────────────┘
 
-┌─────────────────────────────────────────────────────┐
-│ 浏览器 ── fetch ──► Cloudflare Quick Tunnel          │
-│                    https://xxx.trycloudflare.com    │
-│                              │                      │
-│                              ▼                      │
-│                    Flask 127.0.0.1:5050             │
-│                              │                      │
-│                              ▼                      │
-│                    PyTorch CPU + MiniMind-768 SFT   │
-└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│ GitHub Pages（静态兜底）                                     │
+│ repo: yuchengwen393/model-notes / main / .nojekyll           │
+│ 内容 API 不可用时，页面回退 data/*.json 与 posts/*.md         │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-**关键取舍**：GitHub Pages 只托管静态文件，无法运行 Python。因此对话能力放在本机 Flask 服务中，通过 Cloudflare 隧道暴露 HTTPS 地址。博客与模型服务是两条独立链路，任何一条故障都不会拖垮另一条。
+**关键取舍**：GitHub Pages 只托管静态文件，无法运行 Python。v1.2 把内容维护与模型推理分别放在两个本机 Flask 服务中，通过 Cloudflare 隧道暴露 HTTPS 地址。三条链路互相独立：
+
+1. **页面链路**：GitHub Pages 永久可访问；
+2. **内容链路**：内容 API 在线时页面数据来自 SQLite，管理页可读写；离线时自动回退静态 JSON / Markdown；
+3. **模型链路**：推理服务在线时对话可用，离线只影响对话页。
 
 ## 三、技术选型
 
@@ -57,7 +67,9 @@
 | 页面 | HTML5 + CSS3 + 原生 JavaScript | 无构建、无依赖，Pages 直接托管 |
 | 样式 | 原生 CSS + CSS 变量 | 设计令牌集中，换色只改 `:root` |
 | 文章 | Markdown + 自写渲染器 | 内容与页面分离，不引入 marked 等库 |
-| 数据 | JSON | 静态可缓存，结构简单 |
+| 数据 | JSON（静态兜底）+ SQLite（内容后端） | 静态可缓存；后端可在线维护 |
+| 内容服务 | Python 3 + Flask 3 + SQLite | 与模型服务同技术栈，单文件可运行 |
+| 内容管理 | 原生 JS + 管理口令 | 不引入账号体系，满足课程后台要求 |
 | 推理服务 | Python 3.14 + Flask 3.1 | 轻量、易调试，适合本机单模型 |
 | 模型运行时 | PyTorch 2.14.1+cpu + Transformers 5.21 | 与 10.21 训练代码一致，CPU 可跑 |
 | 模型 | MiniMind-768 SFT | 8 层 / 768 维 / 6391 万参数，课程自有权重 |
@@ -68,25 +80,37 @@
 
 ```text
 10.27/
-├── blog/                          # 静态站，Pages 根目录
+├── blog/                          # 静态站 + 内容后端，Pages 根目录
 │   ├── index.html                 # 首页
 │   ├── posts.html                 # 文章列表
 │   ├── post.html                  # 文章详情
 │   ├── projects.html              # 项目
 │   ├── about.html                 # 关于
 │   ├── chat.html                  # 模型对话
+│   ├── admin.html                 # 内容管理（noindex）
 │   ├── css/style.css              # 全部样式与设计令牌
 │   ├── js/
 │   │   ├── site.js                # 导航、菜单、滚动淡入、年份
+│   │   ├── blog-api.js            # 内容 API 客户端（API 优先、静态兜底）
 │   │   ├── home.js                # 首页最新文章
 │   │   ├── posts.js               # 归档搜索与标签筛选
 │   │   ├── post.js                # 详情加载、进度、相关阅读
+│   │   ├── projects.js            # 项目卡片动态渲染
+│   │   ├── about.js               # 关于页站点信息
+│   │   ├── admin.js               # 管理页：口令、站点、项目、文章
 │   │   ├── markdown.js            # 轻量 Markdown 渲染
 │   │   └── chat.js                # 对话状态机与请求
+│   ├── backend/
+│   │   ├── app.py                 # 内容后端：静态托管 + 公开 API + 管理 API
+│   │   ├── requirements.txt       # Flask
+│   │   ├── blog.db                # SQLite（不提交）
+│   │   └── admin_token.txt        # 管理口令（不提交）
 │   ├── data/
-│   │   ├── posts.json             # 文章索引
-│   │   └── config.json            # 对话接口地址（no-store）
-│   ├── posts/                     # 8 篇 Markdown 正文
+│   │   ├── site.json              # 站点信息种子
+│   │   ├── projects.json          # 项目种子
+│   │   ├── posts.json             # 文章索引种子 / 静态兜底
+│   │   └── config.json            # chatApi / contentApi（no-store）
+│   ├── posts/                     # 8 篇 Markdown 正文（种子 / 静态兜底）
 │   ├── PRD.md
 │   ├── TECH_DESIGN.md
 │   ├── AGENTS.md
@@ -112,17 +136,19 @@
 - 共享页脚：文章、项目、对话、GitHub、版权；
 - `body[data-page]` 标记当前页面，`site.js` 据此设置 `aria-current`；
 - 文章详情通过 `post.html?id=<id>` 读取；
-- 文章筛选通过 `posts.html?tag=<tag>` 带入。
+- 文章筛选通过 `posts.html?tag=<tag>` 带入；
+- 管理页 `admin.html` 独立于导航，口令登录后维护内容。
 
-没有模板引擎，头部与页脚在六个 HTML 中重复。这是刻意取舍：避免引入构建步骤，代价是改导航时需要同步六处。
+没有模板引擎，头部与页脚在六个前台 HTML 中重复。这是刻意取舍：避免引入构建步骤，代价是改导航时需要同步六处。
 
 ### 5.2 数据加载
 
-- 首页 / 列表 / 详情均先请求 `data/posts.json`；
-- 详情页再按 `posts/<id>.md` 拉取正文；
+- 首页 / 列表 / 项目 / 关于 / 详情统一通过 `js/blog-api.js` 读取内容；
+- `BlogAPI` 先读 `data/config.json` 的 `contentApi`，再请求 `/api/site`、`/api/projects`、`/api/posts`、`/api/posts/<id>`；
+- 内容 API 请求失败（断网、后端未启动、隧道失效）时自动回退 `data/site.json`、`data/projects.json`、`data/posts.json` 与 `posts/<id>.md`；
 - 请求失败时展示可读的错误文案，不抛出未捕获异常；
-- 文章索引只含元数据（标题、摘要、标签、阅读时长），正文懒加载；
-- 对话配置单独放在 `data/config.json`，用 `fetch(..., { cache: "no-store" })` 加时间戳读取，确保隧道地址更新后立即生效。
+- 文章索引只含元数据（标题、摘要、标签、阅读时长），正文按需加载；
+- 对话与内容配置单独放在 `data/config.json`，用 `fetch(..., { cache: "no-store" })` 加时间戳读取，确保隧道地址更新后立即生效。
 
 ### 5.3 Markdown 渲染
 
@@ -175,7 +201,7 @@
 
 ## 六、后端设计
 
-### 6.1 运行环境
+### 6.1 模型服务运行环境
 
 - Python 3.14，独立虚拟环境 `chat-service/.venv`；
 - `torch 2.14.1+cpu`、`transformers 5.21`、`Flask 3.1`；
@@ -183,7 +209,7 @@
 - 分词器：`10.21/modelT`，词表 6400；
 - 模型：8 层、768 维、12 头，参数量 **63,912,192**。
 
-### 6.2 启动与加载
+### 6.2 模型启动与加载
 
 ```text
 读取环境变量（模型目录 / 权重 / 分词器 / 端口）
@@ -210,7 +236,7 @@
 
 CPU 推理实测约 **27–32 tokens/s**；60–180 tokens 的回答通常 2–7 秒。
 
-### 6.4 接口契约
+### 6.4 模型接口契约
 
 #### GET `/api/health`
 
@@ -272,7 +298,7 @@ CPU 推理实测约 **27–32 tokens/s**；60–180 tokens 的回答通常 2–7
 - 公网入口为 Cloudflare Quick Tunnel 的 HTTPS 域名；
 - 前端在 HTTPS 页面请求 HTTPS 隧道，避免混合内容拦截。
 
-### 6.6 错误处理
+### 6.6 模型错误处理
 
 | 场景 | 前端表现 | 后端行为 |
 | --- | --- | --- |
@@ -282,6 +308,74 @@ CPU 推理实测约 **27–32 tokens/s**；60–180 tokens 的回答通常 2–7
 | 参数错误 | 显示服务返回的错误 | 400 |
 | 生成异常 | 显示「生成失败」 | 500 |
 | 并发请求 | 后到的请求排队 | `Lock` 串行 |
+
+### 6.7 内容后端设计
+
+内容后端位于 `blog/backend/app.py`，单文件实现，负责三件事：
+
+1. 托管 `blog/` 下的静态页面；
+2. 提供站点、项目、文章的公开读取 API；
+3. 提供带管理口令的内容管理 API。
+
+#### 启动与播种
+
+```text
+读取环境变量 PORT（默认 8100）与 BLOG_ADMIN_TOKEN
+  → 创建 / 打开 blog/backend/blog.db
+  → 建表 site / projects / posts（IF NOT EXISTS）
+  → 若表为空，读取 data/site.json、data/projects.json、data/posts.json 与 posts/*.md 播种
+  → 读取或生成管理口令（admin_token.txt）
+  → Flask 以 static_folder=blog/ 托管静态文件
+  → 监听 127.0.0.1:8100
+```
+
+播种只在表为空时执行，管理页修改后不会被种子覆盖；删除 `blog.db` 可恢复为文件版本。
+
+#### 静态托管
+
+- `Flask(static_folder=BLOG_DIR, static_url_path="")`，`/` 显式返回 `index.html`；
+- 静态路由与 `/api/*` 不冲突，API 优先匹配；
+- 未知 `/api/*` 返回 JSON 404，其余路径按静态文件处理。
+
+#### 管理认证
+
+- 口令来源优先级：环境变量 `BLOG_ADMIN_TOKEN` > `backend/admin_token.txt` > 首次启动随机生成；
+- 请求头 `X-Admin-Token` 与口令做 `secrets.compare_digest`；
+- 缺失或不匹配返回 `401 {"error": "管理口令不正确。"}`；
+- 口令文件与数据库已加入 `.gitignore`，不进入仓库。
+
+#### 公开接口
+
+| 方法 | 路径 | 返回 |
+| --- | --- | --- |
+| GET | `/api/health` | `{status, service, database}` |
+| GET | `/api/site` | 站点信息对象 |
+| GET | `/api/projects` | `{projects: [...]}`，按 `sort_order` 升序 |
+| GET | `/api/posts` | `{site, posts: [...]}`，按 `sort_order` 升序 |
+| GET | `/api/posts/<id>` | `{post, content}`；不存在 404 |
+
+#### 管理接口
+
+| 方法 | 路径 | 说明 |
+| --- | --- | --- |
+| GET | `/api/admin/session` | 验证口令，返回 `{ok: true}` |
+| PUT | `/api/admin/site` | 整体保存站点信息，body 必须是 JSON 对象 |
+| POST | `/api/admin/projects` | 新增项目，`id` 与 `title` 必填，`id` 冲突 409 |
+| PUT | `/api/admin/projects/<id>` | 更新项目，不存在 404 |
+| DELETE | `/api/admin/projects/<id>` | 删除项目，幂等 |
+| POST | `/api/admin/posts` | 新增文章，`id` 与 `title` 必填，正文放 `content` |
+| PUT | `/api/admin/posts/<id>` | 更新文章，未传 `content` 时保留原正文 |
+| DELETE | `/api/admin/posts/<id>` | 删除文章，幂等 |
+
+新增文章时 `sort_order` 取当前最小值减一，因此默认排在最前；新增项目取最大值加一，默认排在最后。
+
+#### 跨域与错误处理
+
+- 响应头允许 `GET / POST / PUT / DELETE / OPTIONS`，允许 `Content-Type` 与 `X-Admin-Token`；
+- `OPTIONS` 统一返回 204；
+- 请求体不是 JSON 对象返回 400；
+- 管理口令错误返回 401，资源不存在返回 404，`id` 冲突返回 409；
+- 前端管理页对 401 / 404 / 409 / 网络错误分别给出可读提示。
 
 ## 七、数据设计
 
@@ -311,20 +405,95 @@ CPU 推理实测约 **27–32 tokens/s**；60–180 tokens 的回答通常 2–7
 - 数组顺序即展示顺序，最新在前；
 - 标签用于筛选，首个标签显示在列表卡片上。
 
-### 7.2 `data/config.json`
+### 7.2 `data/site.json` 与 `data/projects.json`
+
+`site.json` 是一个扁平对象，管理页按字段整体读写：
+
+```json
+{
+  "title": "模型手记",
+  "tagline": "把训练、部署与踩坑写在一起。",
+  "intro": "……",
+  "type": "个人项目 / 课程实践",
+  "theme": "模型训练与部署记录",
+  "time": "2026.10",
+  "tech": "HTML / CSS / JavaScript / Python",
+  "model": "MiniMind-768 SFT",
+  "domain": "yuchengwen393.github.io/model-notes",
+  "repo": "https://github.com/yuchengwen393/model-notes"
+}
+```
+
+`projects.json` 的结构：
+
+```json
+{
+  "projects": [
+    {
+      "id": "imagegrab",
+      "no": "01",
+      "category": "浏览器插件",
+      "status": "已上线",
+      "title": "ImageGrab",
+      "summary": "……",
+      "tags": ["Chrome", "JavaScript"],
+      "link": "https://yuchengwen393.github.io/imagegrab/",
+      "linkLabel": "打开插件页"
+    }
+  ]
+}
+```
+
+两个文件既可作为后端首次启动的种子，也可作为内容 API 不可用时的静态兜底。
+
+### 7.3 SQLite 表结构
+
+数据库文件：`blog/backend/blog.db`。
+
+```sql
+CREATE TABLE site (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    data TEXT NOT NULL              -- 站点信息 JSON
+);
+
+CREATE TABLE projects (
+    id TEXT PRIMARY KEY,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    data TEXT NOT NULL              -- 项目 JSON（含 id）
+);
+
+CREATE TABLE posts (
+    id TEXT PRIMARY KEY,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    data TEXT NOT NULL,             -- 文章元数据 JSON（不含正文）
+    content TEXT NOT NULL           -- Markdown 正文
+);
+```
+
+设计说明：
+
+- 用 JSON 列保存可变字段，避免每加一个展示字段就改表结构；
+- `id` 独立成列，便于按 id 查询与唯一约束；
+- `sort_order` 控制展示顺序，文章新增默认置顶，项目新增默认置底；
+- 正文与元数据分列存储，列表接口不返回正文，详情接口才返回 `content`。
+
+### 7.4 `data/config.json`
 
 ```json
 {
   "chatApi": "https://xxx.trycloudflare.com",
+  "contentApi": "https://yyy.trycloudflare.com",
   "modelName": "MiniMind-768 SFT",
   "repo": "https://github.com/yuchengwen393/model-notes",
   "author": "模型手记"
 }
 ```
 
-`chatApi` 为空时，本地开发自动回退到 `http://127.0.0.1:5050`。
+- `chatApi` 为空时，本地开发自动回退到 `http://127.0.0.1:5050`；
+- `contentApi` 为空时，直接使用静态 JSON / Markdown；
+- 两个地址都通过 `no-store` 读取，隧道变化后无需改页面代码。
 
-### 7.3 消息结构
+### 7.5 消息结构
 
 ```ts
 type Message = { role: "user" | "assistant"; content: string };
@@ -342,25 +511,46 @@ type Message = { role: "user" | "assistant"; content: string };
 4. 推送后 1–2 分钟自动构建；
 5. 更新后若浏览器仍显示旧内容，等待 Pages 缓存过期或强制刷新。
 
-### 8.2 推理服务
+### 8.2 内容后端
+
+```powershell
+cd 10.27\blog\backend
+python -m pip install -r requirements.txt
+python app.py
+```
+
+- 默认监听 `127.0.0.1:8100`，同时托管页面与 `/api/*`；
+- 首次启动生成 `admin_token.txt`，管理页需要输入该口令；
+- 数据库文件 `blog.db` 首次启动自动建表并从 `data/` 与 `posts/` 播种；
+- 本地可直接访问 `http://127.0.0.1:8100/` 与 `http://127.0.0.1:8100/admin.html`。
+
+### 8.3 模型推理服务
 
 ```powershell
 cd 10.27\chat-service
 .\.venv\Scripts\python.exe app.py
 ```
 
-### 8.3 公网隧道
+### 8.4 公网隧道
+
+内容链路与模型链路各开一条：
 
 ```powershell
 cd 10.27\chat-service
+.\cloudflared.exe tunnel --url http://127.0.0.1:8100 --no-autoupdate
+
+# 另开窗口
 .\cloudflared.exe tunnel --url http://127.0.0.1:5050 --no-autoupdate
 ```
 
-拿到 `https://xxx.trycloudflare.com` 后写入 `blog/data/config.json`，提交并推送。页面下次加载会以 `no-store` 读取新地址，无需改代码。
+把内容隧道写入 `contentApi`、模型隧道写入 `chatApi`，提交并推送。页面下次加载会以 `no-store` 读取新地址，无需改代码。
 
-### 8.4 回滚
+github.io 永久站没有后端，`contentApi` 指向隧道时，Pages 上的页面会优先读取隧道内容；隧道关闭后自动回退到仓库内的静态数据。
+
+### 8.5 回滚
 
 - 页面与文章：`git revert <commit>` 后推送，Pages 自动重建；
+- 内容数据：恢复 `blog.db` 备份，或删除数据库让后端重新播种；
 - 模型：切换 `MINIMIND_CHECKPOINT` 环境变量到其他权重即可；
 - 接口地址：改回上一个可用隧道地址。
 
@@ -373,13 +563,14 @@ cd 10.27\chat-service
 | 生成速度 | 27–32 tokens/s（CPU，8 线程） |
 | 一轮回答 | 约 2–7 秒（60–180 tokens） |
 | 文章正文 | 按需加载，单篇 < 5KB |
-| 并发 | 串行，第二请求等待第一请求结束 |
+| 内容 API | 本机查询 < 20ms；隧道首包通常 < 500ms |
+| 并发 | 模型串行；内容服务按线程并发 |
 
 优化手段：限制生成长度、只带 8 条历史、文章懒加载、静态资源无构建、无第三方库。
 
 ## 十、测试
 
-### 10.1 后端自测
+### 10.1 模型自测
 
 ```powershell
 cd 10.27\chat-service
@@ -388,7 +579,7 @@ cd 10.27\chat-service
 
 覆盖：分词器加载、权重键匹配、Chat Template、单轮生成。
 
-### 10.2 接口测试
+### 10.2 模型接口测试
 
 ```powershell
 curl http://127.0.0.1:5050/api/health
@@ -397,22 +588,42 @@ curl -X POST http://127.0.0.1:5050/api/chat `
   -d "{\"messages\":[{\"role\":\"user\",\"content\":\"你好\"}],\"max_new_tokens\":80}"
 ```
 
-### 10.3 页面验收
+### 10.3 内容接口测试
+
+```powershell
+curl http://127.0.0.1:8100/api/health
+curl http://127.0.0.1:8100/api/site
+curl http://127.0.0.1:8100/api/projects
+curl http://127.0.0.1:8100/api/posts
+curl http://127.0.0.1:8100/api/posts/10-27-this-blog
+
+# 管理接口：先读取口令
+$token = Get-Content .\admin_token.txt -Raw
+curl -H "X-Admin-Token: $token" http://127.0.0.1:8100/api/admin/session
+```
+
+覆盖：公开接口 200、未知文章 404、错误口令 401、正确口令可读写。
+
+### 10.4 页面验收
 
 1. 首页 3 篇最新文章；
 2. 列表搜索「部署」、标签「SFT」；
 3. 随机打开 3 篇文章，检查代码块与链接；
-4. 对话页在线状态、一轮问答、清空对话；
-5. 关闭 Flask 后对话页显示离线，文章仍可读；
-6. 375px 宽度无横向滚动；
-7. 控制台无报错。
+4. 项目页 5 张卡片、关于页站点信息来自 API；
+5. 关闭内容后端后刷新页面，文章与项目仍能从静态数据加载；
+6. 管理页登录后修改并保存站点 / 项目 / 文章；
+7. 对话页在线状态、一轮问答、清空对话；
+8. 关闭模型服务后对话页显示离线，文章仍可读；
+9. 375px 宽度无横向滚动；
+10. 控制台无报错。
 
 ## 十一、已知限制与演进
 
 - 模型只有 6391 万参数，事实性回答不可靠；
 - 无流式输出，长回答需等待；
-- 无鉴权与限流，隧道地址公开后可被调用；
-- 隧道重启后地址变化，需要更新配置；
-- 对话历史不持久化。
+- 内容管理只有单口令，没有多用户与操作审计；
+- 内容与模型隧道均为临时地址，重启后需更新配置；
+- 对话历史不持久化；
+- 无图片上传与富文本编辑器。
 
-演进顺序：流式输出 → 云服务器 + Docker 固定域名 → 限流与鉴权 → RSS / 后台管理。
+演进顺序：流式输出 → 内容后端上云 + 固定域名 → 多用户与审计 → RSS / 图片上传。

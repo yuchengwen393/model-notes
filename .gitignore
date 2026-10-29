@@ -1,3 +1,6 @@
 .DS_Store
 Thumbs.db
 *.log
+backend/blog.db
+backend/admin_token.txt
+backend/__pycache__/

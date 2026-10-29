@@ -52,8 +52,7 @@
       .join("");
   }
 
-  fetch("data/posts.json")
-    .then((res) => res.json())
+  window.BlogAPI.getPosts()
     .then((data) => {
       posts = data.posts;
       if (!posts.some((p) => p.tags.includes(activeTag))) activeTag = "全部";

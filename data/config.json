@@ -1,5 +1,6 @@
 {
-  "chatApi": "https://certification-hartford-greg-extending.trycloudflare.com",
+  "chatApi": "https://found-modelling-harbour-ltd.trycloudflare.com",
+  "contentApi": "https://partners-usa-alliance-expected.trycloudflare.com",
   "modelName": "MiniMind-768 SFT",
   "repo": "https://github.com/yuchengwen393/model-notes",
   "author": "模型手记"

@@ -16,12 +16,12 @@
   const navEl = document.getElementById("postNav");
   const progressEl = document.getElementById("progressBar");
 
-  fetch("data/posts.json")
-    .then((res) => res.json())
-    .then((data) => {
-      const index = data.posts.findIndex((post) => post.id === id);
+  Promise.all([window.BlogAPI.getPosts(), window.BlogAPI.getPost(id)])
+    .then(([data, detail]) => {
+      const post = detail.post;
+      const content = detail.content;
+      const index = data.posts.findIndex((item) => item.id === id);
       if (index < 0) throw new Error("not found");
-      const post = data.posts[index];
       const newer = data.posts[index - 1];
       const older = data.posts[index + 1];
 
@@ -53,13 +53,7 @@
         <div>${newer ? `<small>上一篇（更新）</small><a href="post.html?id=${encodeURIComponent(newer.id)}">← ${newer.title}</a>` : ""}</div>
         <div style="text-align:right;">${older ? `<small>下一篇（更早）</small><a href="post.html?id=${encodeURIComponent(older.id)}">${older.title} →</a>` : ""}</div>`;
 
-      return fetch(`posts/${post.id}.md`).then((res) => {
-        if (!res.ok) throw new Error("markdown missing");
-        return res.text();
-      });
-    })
-    .then((markdown) => {
-      contentEl.innerHTML = window.renderMarkdown(markdown);
+      contentEl.innerHTML = window.renderMarkdown(content);
     })
     .catch(() => {
       titleEl.textContent = "文章未找到";
