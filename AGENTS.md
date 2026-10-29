@@ -160,6 +160,7 @@ curl http://127.0.0.1:8100/api/posts
 - 网络请求必须有失败分支与用户可读文案；
 - 渲染用户/模型文本使用 `textContent`，不要拼接 `innerHTML`；
 - 内容数据统一走 `window.BlogAPI`，不要在页面脚本里重复写 API 地址；
+- 站点名称统一使用 `[data-site-title]` 标记，由 `site.js` 从 API 同步，不要在新页面里写死新的品牌名；
 - 新增脚本需在对应 HTML 底部按顺序引入，`blog-api.js` 必须在业务脚本之前。
 
 ### 后端

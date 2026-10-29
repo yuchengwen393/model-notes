@@ -149,7 +149,8 @@
 - 内容 API 请求失败（断网、后端未启动、隧道失效）时自动回退 `data/site.json`、`data/projects.json`、`data/posts.json` 与 `posts/<id>.md`；
 - 请求失败时展示可读的错误文案，不抛出未捕获异常；
 - 文章索引只含元数据（标题、摘要、标签、阅读时长），正文按需加载；
-- 对话与内容配置单独放在 `data/config.json`，用 `fetch(..., { cache: "no-store" })` 加时间戳读取，确保隧道地址更新后立即生效。
+- 对话与内容配置单独放在 `data/config.json`，用 `fetch(..., { cache: "no-store" })` 加时间戳读取，确保隧道地址更新后立即生效；
+- `site.js` 读取 `/api/site`，把站点 `title` 同步到所有 `[data-site-title]` 元素与浏览器标题，避免页头品牌名写死。
 
 ### 5.3 Markdown 渲染
 

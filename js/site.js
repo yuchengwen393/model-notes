@@ -43,4 +43,25 @@
   document.querySelectorAll("[data-year]").forEach((el) => {
     el.textContent = new Date().getFullYear();
   });
+
+  // 站点标题从内容 API 读取，同步到页头品牌、页脚名称与浏览器标题。
+  function applySiteTitle() {
+    if (!window.BlogAPI) return;
+    window.BlogAPI.getSite()
+      .then((site) => {
+        const title = site && site.title ? String(site.title).trim() : "";
+        if (!title) return;
+        document.querySelectorAll("[data-site-title]").forEach((el) => {
+          el.textContent = title;
+        });
+        if (document.title.includes("模型手记")) {
+          document.title = document.title.replaceAll("模型手记", title);
+        }
+      })
+      .catch(() => {
+        /* 读取失败时保留 HTML 中的静态标题。 */
+      });
+  }
+
+  applySiteTitle();
 })();
