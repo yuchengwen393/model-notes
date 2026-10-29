@@ -28,7 +28,7 @@ blog/                          # 仓库根目录（Pages 根目录）
 ├── projects.html              # 项目清单
 ├── about.html                 # 关于项目
 ├── chat.html                  # 模型对话
-├── admin.html                 # 内容管理（noindex，不加入导航）
+├── admin.html                 # 内容管理（noindex，页脚有入口）
 ├── css/style.css              # 全部样式与设计令牌
 ├── js/site.js                 # 导航、汉堡菜单、滚动淡入、年份
 ├── js/blog-api.js             # 内容 API 客户端：API 优先、静态兜底
@@ -129,7 +129,7 @@ curl http://127.0.0.1:8100/api/posts
 4. **样式变量集中在 `css/style.css` 的 `:root`**，禁止在页面里散落硬编码颜色；
 5. **`chatApi` 与 `contentApi` 只放在 `data/config.json`**，禁止在 JS/HTML 中写死隧道地址；
 6. **管理口令只存在后端 `admin_token.txt` 或环境变量**，禁止写入前端、文档、提交记录；
-7. **`admin.html` 不加入导航，保持 `noindex,nofollow`**；
+7. **`admin.html` 不加入主导航，保持 `noindex,nofollow`**，入口只放在页脚；
 8. **管理接口必须携带 `X-Admin-Token`**，新增写接口必须复用 `requireAdmin()`；
 9. **默认不出现真实姓名、学校、学号等身份标识**；个人信息卡片由维护者在管理页自行决定是否填写；
 10. **不提交模型权重（`.pth`）、虚拟环境（`.venv`）、`cloudflared.exe`、`blog.db`、`admin_token.txt`、日志与缓存**；

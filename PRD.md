@@ -180,7 +180,7 @@
 
 - 吸顶导航，当前页高亮；
 - 720px 以下折叠为汉堡菜单；
-- 页脚包含文章、项目、对话、GitHub；
+- 页脚包含文章、项目、对话、内容管理、GitHub；
 - 980px / 720px 两个断点；
 - 尊重 `prefers-reduced-motion`。
 
@@ -205,7 +205,7 @@
 
 ### FR-10 内容管理（P0）
 
-- 管理页 `admin.html` 不加入导航，标记 `noindex,nofollow`；
+- 管理页 `admin.html` 不加入主导航，标记 `noindex,nofollow`，并在每个前台页面页脚保留「内容管理」入口；
 - 输入管理口令后调用 `GET /api/admin/session` 验证，口令保存在 `sessionStorage`，关闭标签页即失效；
 - 站点信息：读取并保存，未提交的字段保持不变；
 - 个人信息：昵称、身份、简介、所在地、技能、邮箱、头像通过 `PUT /api/admin/profile` 单独保存；
